@@ -1,75 +1,106 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Fund the Future: AI × Sustainability</title>
 <script src="https://unpkg.com/mqtt@5.10.4/dist/mqtt.min.js" async></script>
 <style>
-  :root {
-    --bg: #09090B; --bg1: #0F0F11; --bg2: #18181B; --bg3: #1F1F23;
-    --border: rgba(255,255,255,0.08); --border-h: rgba(255,255,255,0.14);
-    --text: #FAFAFA; --muted: #A1A1AA; --dim: #52525B;
-    --accent: #10B981; --accent-m: rgba(16,185,129,0.12); --accent-b: rgba(16,185,129,0.25);
-    --gold: #F59E0B; --silver: #9CA3AF; --bronze: #D97706;
-    --danger: #EF4444; --danger-m: rgba(239,68,68,0.12);
+  :root, [data-theme="light"] {
+    --bg-from: #d5f5e3; --bg-to: #aed6f1; --bg-mid: #a3e4d7;
+    --glass: rgba(255,255,255,0.55); --glass-h: rgba(255,255,255,0.7); --glass-border: rgba(255,255,255,0.6);
+    --glass-strong: rgba(255,255,255,0.8);
+    --text: #064E3B; --text-sec: #065F46; --text-dim: #6B7280; --text-inv: #fff;
+    --accent: #059669; --accent-light: #A7F3D0; --accent-bg: rgba(5,150,105,0.1); --accent-border: rgba(5,150,105,0.25);
+    --gold: #D97706; --silver: #6B7280; --bronze: #B45309;
+    --danger: #DC2626; --danger-bg: rgba(220,38,38,0.08);
+    --shadow: 0 4px 24px rgba(0,80,40,0.08); --shadow-lg: 0 8px 40px rgba(0,80,40,0.12);
+    --icon-color: #059669;
+  }
+  [data-theme="dark"] {
+    --bg-from: #071a12; --bg-to: #0a1628; --bg-mid: #0d1f1a;
+    --glass: rgba(15,23,20,0.65); --glass-h: rgba(15,23,20,0.8); --glass-border: rgba(255,255,255,0.08);
+    --glass-strong: rgba(15,23,20,0.85);
+    --text: #E2E8F0; --text-sec: #94A3B8; --text-dim: #64748B; --text-inv: #0f1714;
+    --accent: #34D399; --accent-light: rgba(52,211,153,0.15); --accent-bg: rgba(52,211,153,0.1); --accent-border: rgba(52,211,153,0.25);
+    --gold: #FBBF24; --silver: #94A3B8; --bronze: #F59E0B;
+    --danger: #F87171; --danger-bg: rgba(248,113,113,0.1);
+    --shadow: 0 4px 24px rgba(0,0,0,0.3); --shadow-lg: 0 8px 40px rgba(0,0,0,0.4);
+    --icon-color: #34D399;
   }
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; -webkit-font-smoothing: antialiased; }
-  input::placeholder { color: var(--dim); }
-  button { font-family: inherit; }
+  html, body { min-height: 100vh; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    color: var(--text); -webkit-font-smoothing: antialiased;
+    background: linear-gradient(160deg, var(--bg-from) 0%, var(--bg-mid) 40%, var(--bg-to) 100%);
+    background-attachment: fixed;
+    position: relative;
+  }
+  /* ── SVG Background Scene ── */
+  body::before {
+    content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background-image:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1920 1080'%3E%3Cdefs%3E%3ClinearGradient id='sky' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%2387CEEB' stop-opacity='0.15'/%3E%3Cstop offset='1' stop-color='%2387CEEB' stop-opacity='0'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect fill='url(%23sky)' width='1920' height='400'/%3E%3Cellipse cx='200' cy='180' rx='120' ry='40' fill='white' opacity='0.2'/%3E%3Cellipse cx='260' cy='175' rx='80' ry='35' fill='white' opacity='0.15'/%3E%3Cellipse cx='1500' cy='140' rx='100' ry='30' fill='white' opacity='0.18'/%3E%3Cellipse cx='1560' cy='135' rx='70' ry='25' fill='white' opacity='0.12'/%3E%3Cellipse cx='900' cy='200' rx='90' ry='28' fill='white' opacity='0.1'/%3E%3Cpath d='M0 750 Q200 680 400 720 Q600 760 800 700 Q1000 640 1200 710 Q1400 780 1600 720 Q1800 660 1920 700 L1920 1080 L0 1080Z' fill='%23059669' opacity='0.08'/%3E%3Cpath d='M0 820 Q300 760 600 800 Q900 840 1200 780 Q1500 720 1920 790 L1920 1080 L0 1080Z' fill='%23059669' opacity='0.06'/%3E%3Cpath d='M0 900 Q400 860 800 890 Q1200 920 1600 870 Q1800 850 1920 880 L1920 1080 L0 1080Z' fill='%23059669' opacity='0.04'/%3E%3Cline x1='350' y1='720' x2='350' y2='650' stroke='%23059669' stroke-width='2' opacity='0.12'/%3E%3Ccircle cx='350' cy='645' r='12' fill='none' stroke='%23059669' stroke-width='1.5' opacity='0.12'/%3E%3Cline x1='352' y1='645' x2='362' y2='640' stroke='%23059669' stroke-width='1.5' opacity='0.12'/%3E%3Cline x1='352' y1='645' x2='348' y2='635' stroke='%23059669' stroke-width='1.5' opacity='0.12'/%3E%3Cline x1='1650' y1='700' x2='1650' y2='630' stroke='%23059669' stroke-width='2' opacity='0.1'/%3E%3Ccircle cx='1650' cy='625' r='12' fill='none' stroke='%23059669' stroke-width='1.5' opacity='0.1'/%3E%3Cline x1='1652' y1='625' x2='1662' y2='620' stroke='%23059669' stroke-width='1.5' opacity='0.1'/%3E%3Cpath d='M100 960 Q105 940 110 960' stroke='%23059669' stroke-width='1' fill='none' opacity='0.08'/%3E%3Cpath d='M112 955 Q118 935 124 955' stroke='%23059669' stroke-width='1' fill='none' opacity='0.08'/%3E%3Cpath d='M1800 940 Q1805 920 1810 940' stroke='%23059669' stroke-width='1' fill='none' opacity='0.06'/%3E%3C/svg%3E");
+    background-size: cover; background-position: center;
+  }
+  body > * { position: relative; z-index: 1; }
+
+  input::placeholder { color: var(--text-dim); }
+  button { font-family: inherit; cursor: pointer; }
   button:active { transform: scale(0.97) !important; }
-  ::-webkit-scrollbar { width: 5px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 3px; }
+  ::-webkit-scrollbar { width: 5px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 3px; }
 
   .view { display: none; } .view.active { display: block; }
   .center { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 85vh; padding: 24px; text-align: center; }
 
-  .logo { display: inline-block; }
-  .logo svg { display: block; }
+  /* ── Glass panels ── */
+  .glass { background: var(--glass); backdrop-filter: blur(20px) saturate(1.4); -webkit-backdrop-filter: blur(20px) saturate(1.4); border: 1px solid var(--glass-border); border-radius: 16px; box-shadow: var(--shadow); }
+  .glass-strong { background: var(--glass-strong); backdrop-filter: blur(24px) saturate(1.5); -webkit-backdrop-filter: blur(24px) saturate(1.5); border: 1px solid var(--glass-border); border-radius: 16px; box-shadow: var(--shadow); }
 
-  .btn { padding: 10px 20px; font-size: 13px; font-weight: 600; background: rgba(255,255,255,0.04); color: var(--muted); border: 1px solid var(--border); border-radius: 10px; cursor: pointer; transition: all 0.15s; white-space: nowrap; }
-  .btn:hover { border-color: var(--border-h); color: var(--text); }
-  .btn.accent { background: var(--accent-m); color: var(--accent); border-color: var(--accent-b); }
-  .btn.accent:hover { background: rgba(16,185,129,0.2); }
-  .btn.danger { background: var(--danger-m); color: var(--danger); border-color: rgba(239,68,68,0.2); }
-  .btn.primary { background: var(--accent); color: var(--bg); border: none; font-weight: 700; }
-  .btn.primary:disabled { background: rgba(255,255,255,0.04); color: var(--dim); cursor: not-allowed; }
+  /* ── Buttons ── */
+  .btn { padding: 10px 20px; font-size: 13px; font-weight: 600; background: var(--glass); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); color: var(--text-sec); border: 1px solid var(--glass-border); border-radius: 10px; transition: all 0.15s; white-space: nowrap; }
+  .btn:hover { background: var(--glass-h); }
+  .btn.accent { background: var(--accent-bg); color: var(--accent); border-color: var(--accent-border); }
+  .btn.accent:hover { background: var(--accent-border); }
+  .btn.danger { background: var(--danger-bg); color: var(--danger); border-color: rgba(220,38,38,0.15); }
+  .btn.primary { background: var(--accent); color: var(--text-inv); border: none; font-weight: 700; }
+  .btn.primary:disabled { background: var(--glass); color: var(--text-dim); cursor: not-allowed; border: 1px solid var(--glass-border); }
   .btn.large { padding: 14px 36px; font-size: 15px; }
 
-  .field { width: 100%; padding: 14px 16px; font-size: 16px; background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; color: var(--text); outline: none; font-family: inherit; }
-  .field:focus { border-color: var(--accent-b); }
+  .field { width: 100%; padding: 14px 16px; font-size: 16px; background: var(--glass); backdrop-filter: blur(12px); border: 1px solid var(--glass-border); border-radius: 10px; color: var(--text); outline: none; font-family: inherit; }
+  .field:focus { border-color: var(--accent); }
   .field.sm { padding: 12px 16px; font-size: 14px; }
   .field.mono { font-family: 'SF Mono','Fira Code','JetBrains Mono',monospace; font-size: 13px; padding: 10px 14px; }
 
-  .card { background: var(--bg1); border: 1px solid var(--border); border-radius: 12px; padding: 18px 22px; }
-  .stat-label { font-size: 11px; color: var(--dim); text-transform: uppercase; letter-spacing: 0.08em; font-weight: 500; display: block; margin-bottom: 2px; }
+  .stat-label { font-size: 11px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.08em; font-weight: 500; display: block; margin-bottom: 2px; }
   .stat-value { font-size: 26px; font-weight: 800; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; }
+  .pill { background: var(--accent-bg); border: 1px solid var(--accent-border); border-radius: 8px; padding: 6px 14px; font-size: 13px; color: var(--accent); font-weight: 500; display: inline-block; }
 
-  .pill { background: var(--accent-m); border: 1px solid var(--accent-b); border-radius: 8px; padding: 6px 14px; font-size: 13px; color: var(--accent); font-weight: 500; display: inline-block; }
-
-  .cat-card { background: var(--bg1); border: 1px solid var(--border); border-radius: 12px; padding: 14px; position: relative; overflow: hidden; transition: border-color 0.2s; margin-bottom: 8px; }
-  .cat-card.active { border-color: rgba(255,255,255,0.15); }
+  .cat-card { padding: 14px; position: relative; overflow: hidden; transition: border-color 0.2s; margin-bottom: 8px; }
   .cat-bar { position: absolute; bottom: 0; left: 0; height: 2px; transition: width 0.35s cubic-bezier(0.4,0,0.2,1); }
   .cat-top { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 12px; }
-  .cat-icon { font-size: 20px; line-height: 1; margin-top: 1px; }
   .cat-name { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 1px; }
-  .cat-desc { font-size: 11px; color: var(--dim); line-height: 1.4; }
+  .cat-desc { font-size: 11px; color: var(--text-dim); line-height: 1.4; }
   .cat-controls { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
-  .cat-btn { width: 40px; height: 40px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg2); color: var(--text); font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: opacity 0.15s; }
+  .cat-btn { width: 40px; height: 40px; border-radius: 8px; border: 1px solid var(--glass-border); background: var(--glass); color: var(--text); font-size: 18px; display: flex; align-items: center; justify-content: center; transition: opacity 0.15s; backdrop-filter: blur(8px); }
   .cat-btn:disabled { opacity: 0.25; cursor: not-allowed; }
-  .cat-btn.plus { border-color: rgba(255,255,255,0.15); }
   .cat-amount { flex: 1; text-align: center; font-size: 19px; font-weight: 700; font-variant-numeric: tabular-nums; letter-spacing: -0.02em; transition: color 0.2s; }
 
-  .reveal-btn { padding: 14px 40px; font-size: 15px; font-weight: 700; letter-spacing: -0.02em; background: var(--accent); color: var(--bg); border: none; border-radius: 12px; cursor: pointer; transition: all 0.2s; }
-  .reveal-btn:disabled { background: repeating-linear-gradient(135deg, var(--bg2), var(--bg2) 4px, var(--bg3) 4px, var(--bg3) 8px); color: var(--dim); border: 1px solid var(--border); cursor: not-allowed; }
+  .reveal-btn { padding: 14px 40px; font-size: 15px; font-weight: 700; letter-spacing: -0.02em; background: var(--accent); color: var(--text-inv); border: none; border-radius: 12px; transition: all 0.2s; box-shadow: 0 4px 20px rgba(5,150,105,0.3); }
+  .reveal-btn:hover { box-shadow: 0 6px 28px rgba(5,150,105,0.4); }
+  .reveal-btn:disabled { background: var(--glass); color: var(--text-dim); border: 1px solid var(--glass-border); cursor: not-allowed; box-shadow: none; }
 
-  .anim-bar-track { height: 32px; background: var(--bg2); border-radius: 8px; overflow: hidden; border: 1px solid var(--border); }
+  .anim-bar-track { height: 32px; background: var(--glass); border-radius: 8px; overflow: hidden; border: 1px solid var(--glass-border); }
   .anim-bar-fill { height: 100%; border-radius: 7px; width: 0%; transition: width 1.2s cubic-bezier(0.34,1.56,0.64,1); display: flex; align-items: center; justify-content: flex-end; padding-right: 10px; }
-  .anim-bar-fill span { font-size: 11px; font-weight: 700; opacity: 0.8; }
+  .anim-bar-fill span { font-size: 11px; font-weight: 700; color: var(--text-inv); opacity: 0.9; }
   .rank-badge { width: 28px; height: 28px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; flex-shrink: 0; }
 
-  .modal-bg { position: fixed; inset: 0; z-index: 100; background: rgba(0,0,0,0.8); backdrop-filter: blur(8px); display: flex; align-items: flex-start; justify-content: center; padding: 40px 20px; overflow-y: auto; }
-  .modal { background: var(--bg1); border-radius: 16px; padding: 24px; width: 100%; max-width: 440px; border: 1px solid var(--border); }
+  .modal-bg { position: fixed; inset: 0; z-index: 100; background: rgba(0,0,0,0.3); backdrop-filter: blur(8px); display: flex; align-items: flex-start; justify-content: center; padding: 40px 20px; overflow-y: auto; }
+  .modal { border-radius: 20px; padding: 24px; width: 100%; max-width: 440px; }
+
+  /* Theme toggle */
+  .theme-toggle { position: fixed; top: 16px; right: 16px; z-index: 50; display: flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 500; cursor: pointer; }
 
   .confetti-piece { position: absolute; top: -20px; border-radius: 1px; animation: confFall var(--dur) ease-in var(--delay) forwards; }
   @keyframes confFall { 0%{transform:translateY(0) translateX(0) rotate(0deg);opacity:1} 100%{transform:translateY(100vh) translateX(var(--drift)) rotate(720deg);opacity:0} }
@@ -77,31 +108,35 @@
   @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
   @keyframes bounce { 0%,80%,100%{transform:translateY(0)} 40%{transform:translateY(-7px)} }
 
-  .connection-dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; }
-  .connection-dot.connected { background: var(--accent); animation: pulse 2s ease-in-out infinite; }
-  .connection-dot.disconnected { background: var(--danger); }
+  .conn-dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; }
+  .conn-dot.on { background: var(--accent); animation: pulse 2s ease-in-out infinite; }
+  .conn-dot.off { background: var(--danger); }
 
-  @media (max-width: 767px) {
-    .desktop-only { display: none !important; }
-  }
+  .cat-icon-svg { width: 28px; height: 28px; flex-shrink: 0; }
+  .cat-icon-svg svg { width: 100%; height: 100%; }
 </style>
 </head>
 <body>
 
+<!-- Theme toggle -->
+<button class="glass theme-toggle" onclick="toggleTheme()">
+  <span id="theme-icon">☀️</span> <span id="theme-label">Light</span>
+</button>
+
 <!-- ═══════════════ ROLE SELECT ═══════════════ -->
 <div id="view-role" class="view active">
   <div class="center">
-    <div class="logo" id="logo-role"></div>
-    <h1 style="font-size:30px;font-weight:800;letter-spacing:-0.05em;margin-top:16px;margin-bottom:4px">Fund the Future</h1>
-    <p style="color:var(--dim);font-size:14px;margin-bottom:4px">AI × Sustainability</p>
-    <p style="color:var(--dim);font-size:14px;margin-bottom:36px">Where would you invest 100k?</p>
-    <div style="display:flex;flex-direction:column;gap:10px;width:100%;max-width:320px">
+    <div style="margin-bottom:16px"><svg width="52" height="52" viewBox="0 0 52 52" fill="none"><circle cx="26" cy="26" r="25" stroke="var(--accent)" stroke-width="1.5" opacity="0.4"/><path d="M26 10L31 21L26 18L21 21Z" fill="var(--accent)" opacity="0.5"/><path d="M17 26C17 35 26 41 26 41C26 41 35 35 35 26C35 20 31 17 26 17C21 17 17 20 17 26Z" fill="var(--accent)"/><path d="M25 24L26 34L27 24Z" fill="var(--glass-strong)" opacity="0.5"/></svg></div>
+    <h1 style="font-size:32px;font-weight:800;letter-spacing:-0.05em;margin-bottom:4px">Fund the Future</h1>
+    <p style="color:var(--text-dim);font-size:14px;margin-bottom:4px">AI × Sustainability</p>
+    <p style="color:var(--text-dim);font-size:14px;margin-bottom:36px">Where would you invest 100k?</p>
+    <div style="display:flex;flex-direction:column;gap:10px;width:100%;max-width:320px" class="glass-strong" style="padding:28px;border-radius:20px">
       <button class="btn primary large" onclick="selectRole('participant')">I'm a Participant</button>
       <div style="display:flex;gap:8px;align-items:center">
-        <input type="text" id="inp-session" class="field sm" placeholder="Session code (from presenter)" maxlength="10" style="flex:1;font-family:monospace;text-align:center;letter-spacing:0.1em">
+        <input type="text" id="inp-session" class="field sm" placeholder="Session code" maxlength="10" style="flex:1;font-family:monospace;text-align:center;letter-spacing:0.1em">
         <button class="btn accent" onclick="joinWithCode()" style="padding:12px 16px">Join</button>
       </div>
-      <div style="text-align:center;color:var(--dim);font-size:12px;margin:8px 0">or</div>
+      <div style="text-align:center;color:var(--text-dim);font-size:12px;margin:6px 0">or</div>
       <button class="btn large" onclick="selectRole('presenter')">Presenter / Moderator</button>
     </div>
   </div>
@@ -110,36 +145,38 @@
 <!-- ═══════════════ NAME ENTRY ═══════════════ -->
 <div id="view-name" class="view">
   <div class="center">
-    <div class="logo" id="logo-name"></div>
-    <h1 style="font-size:26px;font-weight:800;letter-spacing:-0.04em;margin-top:16px;margin-bottom:4px">Fund the Future</h1>
-    <p style="color:var(--dim);font-size:13px;margin-bottom:4px">AI × Sustainability</p>
-    <p style="color:var(--muted);font-size:14px;line-height:1.7;max-width:300px;margin-bottom:8px">
-      You have <span style="color:var(--accent);font-weight:700">€100,000</span> to invest. Where do you see the biggest lever?
-    </p>
-    <div style="width:100%;max-width:380px;display:flex;flex-direction:column;gap:8px;margin-bottom:16px">
-      <input type="text" id="inp-name" class="field" placeholder="Your first name" maxlength="20">
-      <input type="text" id="inp-company" class="field sm" placeholder="Company (optional)" maxlength="40">
+    <div class="glass-strong" style="padding:36px 28px;border-radius:24px;width:100%;max-width:400px">
+      <div style="text-align:center;margin-bottom:20px">
+        <svg width="44" height="44" viewBox="0 0 52 52" fill="none" style="margin-bottom:12px"><circle cx="26" cy="26" r="25" stroke="var(--accent)" stroke-width="1.5" opacity="0.4"/><path d="M26 10L31 21L26 18L21 21Z" fill="var(--accent)" opacity="0.5"/><path d="M17 26C17 35 26 41 26 41C26 41 35 35 35 26C35 20 31 17 26 17C21 17 17 20 17 26Z" fill="var(--accent)"/></svg>
+        <h1 style="font-size:24px;font-weight:800;letter-spacing:-0.04em;margin-bottom:4px">Fund the Future</h1>
+        <p style="color:var(--text-dim);font-size:13px;margin-bottom:4px">AI × Sustainability</p>
+        <p style="color:var(--text-sec);font-size:14px;line-height:1.6;margin-top:8px">
+          You have <span style="color:var(--accent);font-weight:700">€100,000</span> to invest. Where do you see the biggest lever?
+        </p>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px">
+        <input type="text" id="inp-name" class="field" placeholder="Your first name" maxlength="20">
+        <input type="text" id="inp-company" class="field sm" placeholder="Company (optional)" maxlength="40">
+      </div>
+      <button class="btn primary large" id="btn-go" disabled onclick="startAllocation()" style="width:100%">Continue</button>
     </div>
-    <button class="btn primary large" id="btn-go" disabled onclick="startAllocation()" style="width:100%;max-width:380px">Continue</button>
   </div>
 </div>
 
 <!-- ═══════════════ ALLOCATION ═══════════════ -->
 <div id="view-alloc" class="view">
   <div style="max-width:460px;margin:0 auto;padding:10px 16px 106px">
-    <div id="alloc-header" style="position:sticky;top:0;z-index:20;padding-bottom:12px;padding-top:8px"></div>
+    <div id="alloc-header" class="glass-strong" style="position:sticky;top:8px;z-index:20;padding:16px 20px;border-radius:16px;margin-bottom:12px"></div>
     <div id="alloc-cards"></div>
-    <div style="position:fixed;bottom:0;left:0;right:0;padding:8px 16px 18px;z-index:30;background:linear-gradient(0deg,var(--bg) 70%,transparent)">
-      <button class="btn primary large" id="btn-submit" disabled onclick="submitAllocation()" style="width:100%;max-width:460px;margin:0 auto;display:block">Allocate the full €100,000</button>
+    <div style="position:fixed;bottom:0;left:0;right:0;padding:12px 16px 20px;z-index:30">
+      <button class="btn primary large" id="btn-submit" disabled onclick="submitAllocation()" style="width:100%;max-width:460px;margin:0 auto;display:block;box-shadow:var(--shadow-lg)">Allocate the full €100,000</button>
     </div>
   </div>
 </div>
 
 <!-- ═══════════════ WAITING ═══════════════ -->
 <div id="view-wait" class="view">
-  <div class="center">
-    <div id="wait-content"></div>
-  </div>
+  <div class="center"><div id="wait-content" class="glass-strong" style="padding:40px 28px;border-radius:24px;max-width:400px;width:100%"></div></div>
 </div>
 
 <!-- ═══════════════ PRESENTER ═══════════════ -->
@@ -147,598 +184,202 @@
   <div style="min-height:100vh;padding:32px 44px 56px;max-width:1140px;margin:0 auto" id="presenter-root"></div>
 </div>
 
-<!-- ═══════════════ CONFETTI CONTAINER ═══════════════ -->
+<!-- ═══════════════ CONFETTI ═══════════════ -->
 <div id="confetti-box" style="position:fixed;inset:0;pointer-events:none;z-index:999;overflow:hidden;display:none"></div>
 
 <script>
 // ╔═══════════════════════════════════════════════════════════════╗
+// ║  INLINE SVG ICONS (Lucide-inspired)                           ║
+// ╚═══════════════════════════════════════════════════════════════╝
+const ICONS = {
+  dq: `<svg viewBox="0 0 24 24" fill="none" stroke="var(--icon-color)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 11-6.2-8.6"/><path d="M21 3v5h-5"/><ellipse cx="12" cy="12" rx="3" ry="1.5"/><path d="M9 12v2c0 .8 1.3 1.5 3 1.5s3-.7 3-1.5v-2"/></svg>`,
+  ca: `<svg viewBox="0 0 24 24" fill="none" stroke="var(--icon-color)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/><path d="M9 10v3"/><path d="M12 8v5"/><path d="M15 11v2"/></svg>`,
+  mb: `<svg viewBox="0 0 24 24" fill="none" stroke="var(--icon-color)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/><circle cx="19" cy="5" r="2.5"/><path d="M19 7.5V12"/></svg>`,
+  ai: `<svg viewBox="0 0 24 24" fill="none" stroke="var(--icon-color)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="4" rx="1"/><rect x="4" y="10" width="16" height="4" rx="1"/><rect x="4" y="16" width="16" height="4" rx="1"/><circle cx="19" cy="6" r="3" fill="var(--accent)" opacity="0.2" stroke="var(--icon-color)"/><text x="17.5" y="8" font-size="5" font-weight="700" fill="var(--icon-color)" font-family="system-ui">AI</text></svg>`,
+  esg: `<svg viewBox="0 0 24 24" fill="none" stroke="var(--icon-color)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c4-4 8-7 8-12a8 8 0 00-16 0c0 5 4 8 8 12z" fill="var(--accent)" opacity="0.1"/><path d="M12 22c4-4 8-7 8-12a8 8 0 00-16 0c0 5 4 8 8 12z"/><path d="M12 12a4 4 0 100-8 4 4 0 000 8z"/><path d="M12 4v4"/><path d="M12 8l3 3"/></svg>`,
+  agent: `<svg viewBox="0 0 24 24" fill="none" stroke="var(--icon-color)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="8" width="14" height="10" rx="3"/><circle cx="9.5" cy="13" r="1" fill="var(--icon-color)"/><circle cx="14.5" cy="13" r="1" fill="var(--icon-color)"/><path d="M9 4h6"/><path d="M12 4v4"/><path d="M8 18v2"/><path d="M16 18v2"/></svg>`,
+};
+const LOGO_SVG = `<svg width="36" height="36" viewBox="0 0 52 52" fill="none"><circle cx="26" cy="26" r="25" stroke="var(--accent)" stroke-width="1.5" opacity="0.4"/><path d="M26 10L31 21L26 18L21 21Z" fill="var(--accent)" opacity="0.5"/><path d="M17 26C17 35 26 41 26 41C26 41 35 35 35 26C35 20 31 17 26 17C21 17 17 20 17 26Z" fill="var(--accent)"/></svg>`;
+
+// ╔═══════════════════════════════════════════════════════════════╗
 // ║  CONFIG                                                       ║
 // ╚═══════════════════════════════════════════════════════════════╝
 const CATEGORIES = [
-  { id:"dq", icon:"🔄", name:"Data Quality & Integration", desc:"Clean up legacy systems (SAP etc.), break down data silos", color:"#F87171" },
-  { id:"ca", icon:"💬", name:"Conversational Analytics", desc:"Natural language access to data, self-service BI", color:"#34D399" },
-  { id:"mb", icon:"📊", name:"Market Data & Benchmarking", desc:"Automated extraction of external data for comparisons", color:"#60A5FA" },
-  { id:"ai", icon:"🏗️", name:"AI-Ready Data Architecture", desc:"Modern data platform (Lakehouse, Medallion, Fabric)", color:"#A78BFA" },
-  { id:"esg", icon:"🌱", name:"Sustainability & ESG Reporting", desc:"Carbon footprint, ESRS KPIs, sustainability reports", color:"#FBBF24" },
-  { id:"agent", icon:"🤖", name:"Agent-Based Automation", desc:"AI agents for workflows, MCP servers, data pipelines", color:"#F472B6" },
+  { id:"dq", name:"Data Quality & Integration", desc:"Clean up legacy systems (SAP etc.), break down data silos", color:"#EF4444" },
+  { id:"ca", name:"Conversational Analytics", desc:"Natural language access to data, self-service BI", color:"#10B981" },
+  { id:"mb", name:"Market Data & Benchmarking", desc:"Automated extraction of external data for comparisons", color:"#3B82F6" },
+  { id:"ai", name:"AI-Ready Data Architecture", desc:"Modern data platform (Lakehouse, Medallion, Fabric)", color:"#8B5CF6" },
+  { id:"esg", name:"Sustainability & ESG Reporting", desc:"Carbon footprint, ESRS KPIs, sustainability reports", color:"#F59E0B" },
+  { id:"agent", name:"Agent-Based Automation", desc:"AI agents for workflows, MCP servers, data pipelines", color:"#EC4899" },
 ];
-const BUDGET = 100000, STEP = 10000;
-const TIMERS = [{l:"1 min",s:60},{l:"2 min",s:120},{l:"3 min",s:180},{l:"5 min",s:300}];
-const fmt = v => "€" + v.toLocaleString("en-US");
-const BROKER = "wss://broker.hivemq.com:8884/mqtt";
+const BUDGET=100000,STEP=10000,POLL_MS=2500;
+const TIMERS=[{l:"1 min",s:60},{l:"2 min",s:120},{l:"3 min",s:180},{l:"5 min",s:300}];
+const fmt=v=>"€"+v.toLocaleString("en-US");
+const BROKER="wss://broker.hivemq.com:8884/mqtt";
 
 // ╔═══════════════════════════════════════════════════════════════╗
 // ║  STATE                                                        ║
 // ╚═══════════════════════════════════════════════════════════════╝
-let role = null, playerName = "", playerCompany = "", playerId = "";
-let alloc = {};
-let sessionId = "";
-let mqttClient = null;
-let participants = {};
-let phase = "voting";
-let timer = null, timerActive = false, timerInterval = null;
-let baseUrl = ""; // Configurable base URL for QR code
-
-CATEGORIES.forEach(c => alloc[c.id] = 0);
+let role=null,playerName="",playerCompany="",playerId="";
+let alloc={};CATEGORIES.forEach(c=>alloc[c.id]=0);
+let sessionId="",mqttClient=null,participants={},phase="voting";
+let timer=null,timerActive=false,timerInterval=null,baseUrl="";
 
 // ╔═══════════════════════════════════════════════════════════════╗
-// ║  SVG LOGO                                                     ║
+// ║  THEME                                                        ║
 // ╚═══════════════════════════════════════════════════════════════╝
-const LOGO_SVG = `<svg width="44" height="44" viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="15" stroke="#10B981" stroke-width="1.5" opacity="0.3"/><path d="M16 6L20 14L16 12L12 14Z" fill="#10B981" opacity="0.6"/><path d="M10 16C10 22 16 26 16 26C16 26 22 22 22 16C22 12 19 10 16 10C13 10 10 12 10 16Z" fill="#10B981"/><path d="M15 15L16 21L17 15Z" fill="#09090B" opacity="0.5"/></svg>`;
-document.querySelectorAll('.logo').forEach(el => el.innerHTML = LOGO_SVG);
+function toggleTheme(){
+  const t=document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';
+  document.documentElement.setAttribute('data-theme',t);
+  document.getElementById('theme-icon').textContent=t==='dark'?'🌙':'☀️';
+  document.getElementById('theme-label').textContent=t==='dark'?'Dark':'Light';
+  try{localStorage.setItem('ftf-theme',t);}catch{}
+}
+(function(){try{const t=localStorage.getItem('ftf-theme');if(t){document.documentElement.setAttribute('data-theme',t);document.getElementById('theme-icon').textContent=t==='dark'?'🌙':'☀️';document.getElementById('theme-label').textContent=t==='dark'?'Dark':'Light';}}catch{}}());
 
 // ╔═══════════════════════════════════════════════════════════════╗
 // ║  QR CODE ENCODER                                              ║
 // ╚═══════════════════════════════════════════════════════════════╝
-const QR = (() => {
-  const EXP=new Uint8Array(512),LOG=new Uint8Array(256);let x=1;
-  for(let i=0;i<255;i++){EXP[i]=x;LOG[x]=i;x=(x<<1)^(x&128?0x11d:0);}
-  for(let i=255;i<512;i++)EXP[i]=EXP[i-255];LOG[0]=255;
-  const gfM=(a,b)=>(a===0||b===0)?0:EXP[LOG[a]+LOG[b]];
-  function rsG(n){let g=[1];for(let i=0;i<n;i++){const ng=new Array(g.length+1).fill(0);for(let j=0;j<g.length;j++){ng[j]^=g[j];ng[j+1]^=gfM(g[j],EXP[i]);}g=ng;}return g;}
-  function rsE(d,n){const g=rsG(n),r=new Uint8Array(d.length+n);r.set(d);for(let i=0;i<d.length;i++){const c=r[i];if(c!==0)for(let j=0;j<g.length;j++)r[i+j]^=gfM(g[j],c);}return r.slice(d.length);}
-  const V=[null,{d:19,e:7,b:[1,19]},{d:34,e:10,b:[1,34]},{d:55,e:15,b:[1,55]},{d:80,e:20,b:[1,80]},{d:108,e:26,b:[1,108]},{d:136,e:36,b:[2,68]},{d:156,e:40,b:[2,78]},{d:194,e:48,b:[2,97]},{d:232,e:56,b:[2,116]},{d:274,e:68,b:[2,68,2,69]}];
-  const AP=[null,[],[6,18],[6,22],[6,26],[6,30],[6,34],[6,22,38],[6,24,42],[6,26,46],[6,28,50]];
-  function sV(l){for(let v=1;v<=10;v++){const c=v<=9?8:16;if(4+c+l*8<=V[v].d*8)return v;}return 10;}
-  function eD(t,ver){const vi=V[ver],cc=ver<=9?8:16,by=new TextEncoder().encode(t);let b="0100";b+=by.length.toString(2).padStart(cc,"0");for(const x of by)b+=x.toString(2).padStart(8,"0");b+="0".repeat(Math.min(4,vi.d*8-b.length));while(b.length%8)b+="0";const pd=[0xec,0x11];let pi=0;while(b.length<vi.d*8){b+=pd[pi%2].toString(2).padStart(8,"0");pi++;}const d=new Uint8Array(vi.d);for(let i=0;i<vi.d;i++)d[i]=parseInt(b.substr(i*8,8),2);const ep=vi.e/(vi.b.length/2),bl=[],ec=[];let di=0;for(let i=0;i<vi.b.length;i+=2){const cnt=vi.b[i],sz=vi.b[i+1];for(let j=0;j<cnt;j++){const bk=d.slice(di,di+sz);bl.push(bk);ec.push(rsE(bk,ep));di+=sz;}}const r=[];const mx=Math.max(...bl.map(b=>b.length));for(let i=0;i<mx;i++)for(const b of bl)if(i<b.length)r.push(b[i]);for(let i=0;i<ep;i++)for(const b of ec)if(i<b.length)r.push(b[i]);return new Uint8Array(r);}
-  function cM(ver){const sz=ver*4+17,m=Array.from({length:sz},()=>new Int8Array(sz)),rv=Array.from({length:sz},()=>new Uint8Array(sz));const set=(r,c,v)=>{if(r>=0&&r<sz&&c>=0&&c<sz){m[r][c]=v?1:-1;rv[r][c]=1;}};function pf(row,col){for(let r=-1;r<=7;r++)for(let c=-1;c<=7;c++){const io=r>=0&&r<=6&&c>=0&&c<=6,ii=r>=2&&r<=4&&c>=2&&c<=4,ob=r===0||r===6||c===0||c===6;set(row+r,col+c,ii||(io&&ob));}}pf(0,0);pf(0,sz-7);pf(sz-7,0);for(let i=8;i<sz-8;i++){set(6,i,i%2===0);set(i,6,i%2===0);}const al=AP[ver];if(al.length>0)for(const r of al)for(const c of al){if(rv[r]?.[c])continue;for(let dr=-2;dr<=2;dr++)for(let dc=-2;dc<=2;dc++)set(r+dr,c+dc,Math.abs(dr)===2||Math.abs(dc)===2||(dr===0&&dc===0));}set(sz-8,8,true);for(let i=0;i<8;i++){if(!rv[8][i]){rv[8][i]=1;m[8][i]=0;}if(!rv[8][sz-1-i]){rv[8][sz-1-i]=1;m[8][sz-1-i]=0;}if(!rv[i][8]){rv[i][8]=1;m[i][8]=0;}if(!rv[sz-1-i][8]){rv[sz-1-i][8]=1;m[sz-1-i][8]=0;}}if(!rv[8][8]){rv[8][8]=1;m[8][8]=0;}return{m,rv,sz};}
-  function pD(m,rv,sz,d){let bi=0;const tb=d.length*8;let col=sz-1;while(col>=0){if(col===6)col--;for(let row=0;row<sz;row++)for(let c=0;c<2;c++){const cc=col-c,up=((sz-1-col+(col>6?1:0))/2|0)%2===0,rr=up?sz-1-row:row;if(cc>=0&&!rv[rr][cc]){if(bi<tb){m[rr][cc]=((d[bi>>3]>>(7-(bi&7)))&1)?1:-1;bi++;}else m[rr][cc]=-1;}}col-=2;}}
-  const MK=[(r,c)=>(r+c)%2===0,r=>r%2===0,(_,c)=>c%3===0,(r,c)=>(r+c)%3===0,(r,c)=>(~~(r/2)+~~(c/3))%2===0,(r,c)=>(r*c)%2+(r*c)%3===0,(r,c)=>((r*c)%2+(r*c)%3)%2===0,(r,c)=>((r+c)%2+(r*c)%3)%2===0];
-  function aM(m,rv,sz,mi){const o=m.map(r=>Int8Array.from(r));for(let r=0;r<sz;r++)for(let c=0;c<sz;c++)if(!rv[r][c]&&MK[mi](r,c))o[r][c]=o[r][c]===1?-1:1;return o;}
-  const FB=[0x77c4,0x72f3,0x7daa,0x789d,0x662f,0x6318,0x6c41,0x6976];
-  function wF(m,sz,mi){const b=FB[mi],p=[];for(let i=0;i<=5;i++)p.push([8,i]);p.push([8,7],[8,8],[7,8]);for(let i=5;i>=0;i--)p.push([i,8]);for(let i=0;i<15;i++){const v=(b>>(14-i))&1;m[p[i][0]][p[i][1]]=v?1:-1;}for(let i=0;i<7;i++)m[sz-1-i][8]=((b>>(14-i))&1)?1:-1;for(let i=7;i<15;i++)m[8][sz-15+i]=((b>>(14-i))&1)?1:-1;}
-  function sc(m,sz){let s=0;for(let r=0;r<sz;r++){let run=1;for(let c=1;c<sz;c++){if(m[r][c]===m[r][c-1])run++;else{if(run>=5)s+=run-2;run=1;}}if(run>=5)s+=run-2;}for(let c=0;c<sz;c++){let run=1;for(let r=1;r<sz;r++){if(m[r][c]===m[r-1][c])run++;else{if(run>=5)s+=run-2;run=1;}}if(run>=5)s+=run-2;}return s;}
-  function generate(txt){const ver=sV(new TextEncoder().encode(txt).length),cw=eD(txt,ver),{m,rv,sz}=cM(ver);pD(m,rv,sz,cw);let bs=Infinity,bm=null;for(let i=0;i<8;i++){const mk=aM(m,rv,sz,i);wF(mk,sz,i);const s=sc(mk,sz);if(s<bs){bs=s;bm=mk;}}return{matrix:bm,size:sz};}
-  return{generate};
-})();
-
-function makeQR(text, size=180) {
-  try {
-    const {matrix:m, size:qs} = QR.generate(text);
-    const cs = size / (qs + 8);
-    let rects = '';
-    for (let r=0; r<qs; r++) for (let c=0; c<qs; c++) if (m[r][c]===1) rects += `<rect x="${(c+4)*cs}" y="${(r+4)*cs}" width="${cs+.5}" height="${cs+.5}" fill="#09090B"/>`;
-    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${size} ${size}" width="${size}" height="${size}"><rect width="${size}" height="${size}" fill="#fff" rx="12"/>${rects}</svg>`;
-  } catch { return '<div style="width:180px;height:180px;background:var(--bg2);border-radius:12px;display:flex;align-items:center;justify-content:center;color:var(--dim);font-size:12px">QR Error</div>'; }
-}
+const QR=(()=>{const EXP=new Uint8Array(512),LOG=new Uint8Array(256);let x=1;for(let i=0;i<255;i++){EXP[i]=x;LOG[x]=i;x=(x<<1)^(x&128?0x11d:0);}for(let i=255;i<512;i++)EXP[i]=EXP[i-255];LOG[0]=255;const gfM=(a,b)=>(a===0||b===0)?0:EXP[LOG[a]+LOG[b]];function rsG(n){let g=[1];for(let i=0;i<n;i++){const ng=new Array(g.length+1).fill(0);for(let j=0;j<g.length;j++){ng[j]^=g[j];ng[j+1]^=gfM(g[j],EXP[i]);}g=ng;}return g;}function rsE(d,n){const g=rsG(n),r=new Uint8Array(d.length+n);r.set(d);for(let i=0;i<d.length;i++){const c=r[i];if(c!==0)for(let j=0;j<g.length;j++)r[i+j]^=gfM(g[j],c);}return r.slice(d.length);}const V=[null,{d:19,e:7,b:[1,19]},{d:34,e:10,b:[1,34]},{d:55,e:15,b:[1,55]},{d:80,e:20,b:[1,80]},{d:108,e:26,b:[1,108]},{d:136,e:36,b:[2,68]},{d:156,e:40,b:[2,78]},{d:194,e:48,b:[2,97]},{d:232,e:56,b:[2,116]},{d:274,e:68,b:[2,68,2,69]}];const AP=[null,[],[6,18],[6,22],[6,26],[6,30],[6,34],[6,22,38],[6,24,42],[6,26,46],[6,28,50]];function sV(l){for(let v=1;v<=10;v++){const c=v<=9?8:16;if(4+c+l*8<=V[v].d*8)return v;}return 10;}function eD(t,ver){const vi=V[ver],cc=ver<=9?8:16,by=new TextEncoder().encode(t);let b="0100";b+=by.length.toString(2).padStart(cc,"0");for(const x of by)b+=x.toString(2).padStart(8,"0");b+="0".repeat(Math.min(4,vi.d*8-b.length));while(b.length%8)b+="0";const pd=[0xec,0x11];let pi=0;while(b.length<vi.d*8){b+=pd[pi%2].toString(2).padStart(8,"0");pi++;}const d=new Uint8Array(vi.d);for(let i=0;i<vi.d;i++)d[i]=parseInt(b.substr(i*8,8),2);const ep=vi.e/(vi.b.length/2),bl=[],ec=[];let di=0;for(let i=0;i<vi.b.length;i+=2){const cnt=vi.b[i],sz=vi.b[i+1];for(let j=0;j<cnt;j++){const bk=d.slice(di,di+sz);bl.push(bk);ec.push(rsE(bk,ep));di+=sz;}}const r=[];const mx=Math.max(...bl.map(b=>b.length));for(let i=0;i<mx;i++)for(const b of bl)if(i<b.length)r.push(b[i]);for(let i=0;i<ep;i++)for(const b of ec)if(i<b.length)r.push(b[i]);return new Uint8Array(r);}function cM(ver){const sz=ver*4+17,m=Array.from({length:sz},()=>new Int8Array(sz)),rv=Array.from({length:sz},()=>new Uint8Array(sz));const set=(r,c,v)=>{if(r>=0&&r<sz&&c>=0&&c<sz){m[r][c]=v?1:-1;rv[r][c]=1;}};function pf(row,col){for(let r=-1;r<=7;r++)for(let c=-1;c<=7;c++){const io=r>=0&&r<=6&&c>=0&&c<=6,ii=r>=2&&r<=4&&c>=2&&c<=4,ob=r===0||r===6||c===0||c===6;set(row+r,col+c,ii||(io&&ob));}}pf(0,0);pf(0,sz-7);pf(sz-7,0);for(let i=8;i<sz-8;i++){set(6,i,i%2===0);set(i,6,i%2===0);}const al=AP[ver];if(al.length>0)for(const r of al)for(const c of al){if(rv[r]?.[c])continue;for(let dr=-2;dr<=2;dr++)for(let dc=-2;dc<=2;dc++)set(r+dr,c+dc,Math.abs(dr)===2||Math.abs(dc)===2||(dr===0&&dc===0));}set(sz-8,8,true);for(let i=0;i<8;i++){if(!rv[8][i]){rv[8][i]=1;m[8][i]=0;}if(!rv[8][sz-1-i]){rv[8][sz-1-i]=1;m[8][sz-1-i]=0;}if(!rv[i][8]){rv[i][8]=1;m[i][8]=0;}if(!rv[sz-1-i][8]){rv[sz-1-i][8]=1;m[sz-1-i][8]=0;}}if(!rv[8][8]){rv[8][8]=1;m[8][8]=0;}return{m,rv,sz};}function pD(m,rv,sz,d){let bi=0;const tb=d.length*8;let col=sz-1;while(col>=0){if(col===6)col--;for(let row=0;row<sz;row++)for(let c=0;c<2;c++){const cc=col-c,up=((sz-1-col+(col>6?1:0))/2|0)%2===0,rr=up?sz-1-row:row;if(cc>=0&&!rv[rr][cc]){if(bi<tb){m[rr][cc]=((d[bi>>3]>>(7-(bi&7)))&1)?1:-1;bi++;}else m[rr][cc]=-1;}}col-=2;}}const MK=[(r,c)=>(r+c)%2===0,r=>r%2===0,(_,c)=>c%3===0,(r,c)=>(r+c)%3===0,(r,c)=>(~~(r/2)+~~(c/3))%2===0,(r,c)=>(r*c)%2+(r*c)%3===0,(r,c)=>((r*c)%2+(r*c)%3)%2===0,(r,c)=>((r+c)%2+(r*c)%3)%2===0];function aM(m,rv,sz,mi){const o=m.map(r=>Int8Array.from(r));for(let r=0;r<sz;r++)for(let c=0;c<sz;c++)if(!rv[r][c]&&MK[mi](r,c))o[r][c]=o[r][c]===1?-1:1;return o;}const FB=[0x77c4,0x72f3,0x7daa,0x789d,0x662f,0x6318,0x6c41,0x6976];function wF(m,sz,mi){const b=FB[mi],p=[];for(let i=0;i<=5;i++)p.push([8,i]);p.push([8,7],[8,8],[7,8]);for(let i=5;i>=0;i--)p.push([i,8]);for(let i=0;i<15;i++){const v=(b>>(14-i))&1;m[p[i][0]][p[i][1]]=v?1:-1;}for(let i=0;i<7;i++)m[sz-1-i][8]=((b>>(14-i))&1)?1:-1;for(let i=7;i<15;i++)m[8][sz-15+i]=((b>>(14-i))&1)?1:-1;}function sc(m,sz){let s=0;for(let r=0;r<sz;r++){let run=1;for(let c=1;c<sz;c++){if(m[r][c]===m[r][c-1])run++;else{if(run>=5)s+=run-2;run=1;}}if(run>=5)s+=run-2;}for(let c=0;c<sz;c++){let run=1;for(let r=1;r<sz;r++){if(m[r][c]===m[r-1][c])run++;else{if(run>=5)s+=run-2;run=1;}}if(run>=5)s+=run-2;}return s;}function generate(txt){const ver=sV(new TextEncoder().encode(txt).length),cw=eD(txt,ver),{m,rv,sz}=cM(ver);pD(m,rv,sz,cw);let bs=Infinity,bm=null;for(let i=0;i<8;i++){const mk=aM(m,rv,sz,i);wF(mk,sz,i);const s=sc(mk,sz);if(s<bs){bs=s;bm=mk;}}return{matrix:bm,size:sz};}return{generate};})();
+function makeQR(text,size=180){try{const{matrix:m,size:qs}=QR.generate(text);const cs=size/(qs+8);let r='';for(let row=0;row<qs;row++)for(let c=0;c<qs;c++)if(m[row][c]===1)r+=`<rect x="${(c+4)*cs}" y="${(row+4)*cs}" width="${cs+.5}" height="${cs+.5}" fill="#064E3B"/>`;return`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${size} ${size}" width="${size}" height="${size}"><rect width="${size}" height="${size}" fill="#fff" rx="12"/>${r}</svg>`;}catch{return'<div style="width:180px;height:180px;background:var(--glass);border-radius:12px;display:flex;align-items:center;justify-content:center;color:var(--text-dim);font-size:12px">QR Error</div>';}}
 
 // ╔═══════════════════════════════════════════════════════════════╗
-// ║  MQTT CONNECTION                                              ║
+// ║  MQTT                                                         ║
 // ╚═══════════════════════════════════════════════════════════════╝
-function connectMQTT(onConnect) {
-  if (typeof mqtt === 'undefined') {
-    console.warn('MQTT library not loaded yet, retrying in 1s...');
-    setTimeout(() => connectMQTT(onConnect), 1000);
-    return;
-  }
-  try {
-    const clientId = 'ftf_' + Math.random().toString(36).substr(2, 8);
-    mqttClient = mqtt.connect(BROKER, {
-      clientId, clean: true, connectTimeout: 8000, reconnectPeriod: 3000,
-    });
-    mqttClient.on('connect', () => { console.log('MQTT connected'); onConnect?.(); renderPresenter?.(); });
-    mqttClient.on('error', e => console.error('MQTT error:', e));
-    mqttClient.on('offline', () => { console.warn('MQTT offline'); });
-  } catch(e) {
-    console.error('MQTT connect failed:', e);
-  }
-}
-
-function publish(subtopic, data, retain = false) {
-  try {
-    if (mqttClient?.connected) {
-      mqttClient.publish(`ftf/${sessionId}/${subtopic}`, JSON.stringify(data), { qos: 1, retain });
-    }
-  } catch(e) { console.error('Publish error:', e); }
-}
-
-function subscribe(subtopic, handler) {
-  if (!mqttClient) return;
-  const topic = `ftf/${sessionId}/${subtopic}`;
-  mqttClient.subscribe(topic, { qos: 1 });
-  mqttClient.on('message', (t, msg) => {
-    if (t.startsWith(topic.replace('#', ''))) {
-      try { handler(JSON.parse(msg.toString()), t); } catch {}
-    }
-  });
-}
+function connectMQTT(onConnect){if(typeof mqtt==='undefined'){setTimeout(()=>connectMQTT(onConnect),1000);return;}try{const cid='ftf_'+Math.random().toString(36).substr(2,8);mqttClient=mqtt.connect(BROKER,{clientId:cid,clean:true,connectTimeout:8000,reconnectPeriod:3000});mqttClient.on('connect',()=>{console.log('MQTT connected');onConnect?.();if(typeof renderPresenter==='function'&&role==='presenter')renderPresenter();});mqttClient.on('error',e=>console.error('MQTT error:',e));}catch(e){console.error('MQTT connect failed:',e);}}
+function publish(sub,data,retain=false){try{if(mqttClient?.connected)mqttClient.publish(`ftf/${sessionId}/${sub}`,JSON.stringify(data),{qos:1,retain});}catch(e){console.error('Publish error:',e);}}
+function subscribe(sub,handler){if(!mqttClient)return;const t=`ftf/${sessionId}/${sub}`;mqttClient.subscribe(t,{qos:1});mqttClient.on('message',(top,msg)=>{if(top.startsWith(t.replace('#',''))){try{handler(JSON.parse(msg.toString()),top);}catch{}}});}
 
 // ╔═══════════════════════════════════════════════════════════════╗
-// ║  VIEW SWITCHING                                               ║
+// ║  NAVIGATION                                                   ║
 // ╚═══════════════════════════════════════════════════════════════╝
-function showView(id) {
-  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-  document.getElementById('view-' + id).classList.add('active');
-}
+function showView(id){document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));document.getElementById('view-'+id).classList.add('active');}
+function getSessionFromUrl(){const p=new URLSearchParams(window.location.search);if(p.get('s'))return p.get('s');for(const[k,v]of p.entries()){const c=v||k;if(c&&c.length>=4&&c.length<=12&&/^[a-z0-9]+$/i.test(c))return c;}return'';}
+function joinWithCode(){const c=document.getElementById('inp-session')?.value?.trim();if(!c){document.getElementById('inp-session')?.focus();return;}sessionId=c;role='participant';showView('name');document.getElementById('inp-name').focus();}
+function selectRole(r){role=r;if(r==='participant'){sessionId=getSessionFromUrl()||document.getElementById('inp-session')?.value?.trim()||'';if(!sessionId){document.getElementById('inp-session')?.focus();return;}showView('name');document.getElementById('inp-name').focus();}else{sessionId=Math.random().toString(36).substr(2,6);initPresenter();}}
+(function(){const c=getSessionFromUrl();if(c){sessionId=c;role='participant';showView('name');setTimeout(()=>document.getElementById('inp-name')?.focus(),100);}})();
+document.getElementById('inp-name').addEventListener('input',()=>{document.getElementById('btn-go').disabled=!document.getElementById('inp-name').value.trim();});
+document.getElementById('inp-name').addEventListener('keydown',e=>{if(e.key==='Enter'&&document.getElementById('inp-name').value.trim())startAllocation();});
 
 // ╔═══════════════════════════════════════════════════════════════╗
-// ║  ROLE SELECTION                                               ║
+// ║  PARTICIPANT                                                  ║
 // ╚═══════════════════════════════════════════════════════════════╝
-function joinWithCode() {
-  const code = document.getElementById('inp-session')?.value?.trim();
-  if (!code) { document.getElementById('inp-session')?.focus(); return; }
-  sessionId = code;
-  role = 'participant';
-  showView('name');
-  document.getElementById('inp-name').focus();
+function startAllocation(){playerName=document.getElementById('inp-name').value.trim();playerCompany=document.getElementById('inp-company').value.trim();playerId=playerName.toLowerCase().replace(/[^a-z0-9]/g,'')+'_'+Date.now().toString(36);CATEGORIES.forEach(c=>alloc[c.id]=0);renderAllocation();showView('alloc');if(mqttClient){try{mqttClient.end(true);}catch{}mqttClient=null;}connectMQTT();}
+function renderAllocation(){
+  const total=Object.values(alloc).reduce((a,b)=>a+b,0),rem=BUDGET-total;
+  const label=playerCompany?`${playerName} (${playerCompany})`:playerName;
+  document.getElementById('alloc-header').innerHTML=`
+    <div style="text-align:center;margin-bottom:4px"><span style="font-size:10px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.12em;font-weight:500">Remaining Budget</span></div>
+    <div style="font-size:30px;font-weight:800;text-align:center;font-variant-numeric:tabular-nums;letter-spacing:-0.03em;color:${rem===0?'var(--accent)':rem<30000?'var(--gold)':'var(--text)'}">${fmt(rem)}</div>
+    <div style="height:3px;background:rgba(0,0,0,0.06);border-radius:2px;margin-top:6px;overflow:hidden"><div style="height:100%;border-radius:2px;width:${(total/BUDGET)*100}%;background:var(--accent);transition:width 0.35s cubic-bezier(0.4,0,0.2,1)"></div></div>
+    <div style="text-align:center;margin-top:4px;font-size:11px;color:var(--text-dim)">${label} · ${fmt(total)} of ${fmt(BUDGET)}</div>`;
+  let html='';
+  CATEGORIES.forEach(cat=>{const v=alloc[cat.id],pct=Math.round((v/BUDGET)*100);
+    html+=`<div class="glass cat-card" style="${v>0?'border-color:'+cat.color+'40':''}">
+      <div class="cat-bar" style="width:${pct}%;background:${cat.color}"></div>
+      <div class="cat-top"><div class="cat-icon-svg">${ICONS[cat.id]}</div><div style="flex:1;min-width:0"><div class="cat-name">${cat.name}</div><div class="cat-desc">${cat.desc}</div></div></div>
+      <div class="cat-controls">
+        <button class="cat-btn" onclick="changeAlloc('${cat.id}',-1)" ${v<=0?'disabled':''}>−</button>
+        <div class="cat-amount" style="color:${v>0?cat.color:'var(--text-dim)'}">${fmt(v)}${v>0?'<div style="font-size:10px;color:var(--text-dim);font-weight:400;margin-top:1px">'+pct+'%</div>':''}</div>
+        <button class="cat-btn" onclick="changeAlloc('${cat.id}',1)" ${rem<=0&&v===0?'disabled':''} style="${v>=0?'border-color:'+cat.color+'30;color:'+cat.color:''}">+</button>
+      </div></div>`;});
+  document.getElementById('alloc-cards').innerHTML=html;
+  const btn=document.getElementById('btn-submit');btn.disabled=rem!==0;
+  btn.textContent=rem===0?'Submit allocation':'Allocate the full '+fmt(BUDGET);
 }
-
-function selectRole(r) {
-  role = r;
-  if (r === 'participant') {
-    sessionId = getSessionFromUrl() || document.getElementById('inp-session')?.value?.trim() || '';
-    if (!sessionId) {
-      document.getElementById('inp-session')?.focus();
-      return;
-    }
-    showView('name');
-    document.getElementById('inp-name').focus();
-  } else {
-    sessionId = Math.random().toString(36).substr(2, 6);
-    initPresenter();
-  }
-}
-
-// Extract session code from URL - handles ?s=xxx, ?=xxx, bare params
-function getSessionFromUrl() {
-  const params = new URLSearchParams(window.location.search);
-  // Standard: ?s=xxx
-  if (params.get('s')) return params.get('s');
-  // Fallback: ?=xxx (user might type without param name)
-  for (const [key, val] of params.entries()) {
-    const code = val || key; // handle ?=xxx or ?xxx
-    if (code && code.length >= 4 && code.length <= 12 && /^[a-z0-9]+$/i.test(code)) return code;
-  }
-  return '';
-}
-
-// Auto-detect from URL: if session code is present, go straight to participant mode
-(function() {
-  const code = getSessionFromUrl();
-  if (code) {
-    sessionId = code;
-    role = 'participant';
-    showView('name');
-    setTimeout(() => document.getElementById('inp-name')?.focus(), 100);
-  }
-})();
-
-// Name entry validation
-document.getElementById('inp-name').addEventListener('input', () => {
-  document.getElementById('btn-go').disabled = !document.getElementById('inp-name').value.trim();
-});
-document.getElementById('inp-name').addEventListener('keydown', e => {
-  if (e.key === 'Enter' && document.getElementById('inp-name').value.trim()) startAllocation();
-});
-
-// ╔═══════════════════════════════════════════════════════════════╗
-// ║  PARTICIPANT: ALLOCATION                                      ║
-// ╚═══════════════════════════════════════════════════════════════╝
-function startAllocation() {
-  playerName = document.getElementById('inp-name').value.trim();
-  playerCompany = document.getElementById('inp-company').value.trim();
-  playerId = playerName.toLowerCase().replace(/[^a-z0-9]/g,'') + '_' + Date.now().toString(36);
-  CATEGORIES.forEach(c => alloc[c.id] = 0);
-  renderAllocation();
-  showView('alloc');
-
-  // Disconnect old MQTT if any (important for repeat participation)
-  if (mqttClient) { try { mqttClient.end(true); } catch {} mqttClient = null; }
-  // Connect fresh MQTT (for submission), but do NOT subscribe to phase yet
-  connectMQTT();
-}
-
-function renderAllocation() {
-  const total = Object.values(alloc).reduce((a,b) => a+b, 0);
-  const rem = BUDGET - total;
-  const label = playerCompany ? `${playerName} (${playerCompany})` : playerName;
-
-  // Header
-  document.getElementById('alloc-header').innerHTML = `
-    <div style="text-align:center;margin-bottom:5px"><span style="font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:0.12em;font-weight:500">Remaining Budget</span></div>
-    <div style="font-size:32px;font-weight:800;text-align:center;font-variant-numeric:tabular-nums;letter-spacing:-0.03em;color:${rem===0?'var(--accent)':rem<30000?'var(--gold)':'var(--text)'};transition:color 0.2s">${fmt(rem)}</div>
-    <div style="height:3px;background:var(--bg3);border-radius:2px;margin-top:8px;overflow:hidden"><div style="height:100%;border-radius:2px;width:${(total/BUDGET)*100}%;background:${rem===0?'var(--accent)':'rgba(255,255,255,0.25)'};transition:width 0.35s cubic-bezier(0.4,0,0.2,1)"></div></div>
-    <div style="text-align:center;margin-top:5px;font-size:11px;color:var(--dim)">${label} · ${fmt(total)} of ${fmt(BUDGET)}</div>
-  `;
-  document.getElementById('alloc-header').style.background = `linear-gradient(180deg, var(--bg) 78%, transparent)`;
-
-  // Cards
-  let html = '';
-  CATEGORIES.forEach(cat => {
-    const v = alloc[cat.id];
-    const pct = Math.round((v / BUDGET) * 100);
-    html += `
-      <div class="cat-card ${v > 0 ? 'active' : ''}" style="${v > 0 ? 'border-color:'+cat.color+'30' : ''}">
-        <div class="cat-bar" style="width:${pct}%;background:${cat.color}"></div>
-        <div class="cat-top">
-          <span class="cat-icon">${cat.icon}</span>
-          <div style="flex:1;min-width:0"><div class="cat-name">${cat.name}</div><div class="cat-desc">${cat.desc}</div></div>
-        </div>
-        <div class="cat-controls">
-          <button class="cat-btn" onclick="changeAlloc('${cat.id}',-1)" ${v<=0?'disabled':''}>&minus;</button>
-          <div class="cat-amount" style="color:${v > 0 ? cat.color : 'var(--dim)'}">${fmt(v)}${v > 0 ? '<div style="font-size:10px;color:var(--dim);font-weight:400;margin-top:1px">'+pct+'%</div>' : ''}</div>
-          <button class="cat-btn plus" onclick="changeAlloc('${cat.id}',1)" ${rem<=0&&v===0?'disabled':''} style="${v>=0?'border-color:'+cat.color+'30;background:'+cat.color+'10;color:'+cat.color:''}">+</button>
-        </div>
-      </div>`;
-  });
-  document.getElementById('alloc-cards').innerHTML = html;
-
-  // Submit button
-  const btn = document.getElementById('btn-submit');
-  btn.disabled = !rem === 0 ? true : rem !== 0;
-  btn.textContent = rem === 0 ? 'Submit allocation' : 'Allocate the full ' + fmt(BUDGET);
-}
-
-function changeAlloc(id, dir) {
-  const newVal = alloc[id] + dir * STEP;
-  if (newVal < 0) return;
-  const newTotal = Object.values({...alloc, [id]: newVal}).reduce((a,b) => a+b, 0);
-  if (newTotal > BUDGET) return;
-  alloc[id] = newVal;
-  renderAllocation();
-}
-
-function submitAllocation() {
-  const total = Object.values(alloc).reduce((a,b) => a+b, 0);
-  if (total !== BUDGET) return;
-  const submitTime = Date.now();
-  publish('votes/' + playerId, { name: playerName, company: playerCompany, allocations: alloc, ts: submitTime }, true);
-  fireConfetti();
-  setTimeout(() => {
-    showWaiting(false);
-    // Subscribe to phase changes ONLY now (after submission)
-    // Timestamp guard: ignore any phase message older than our submission
-    subscribe('phase', data => {
-      if (data.phase === 'revealed' && data.ts > submitTime) {
-        showWaiting(true);
-      }
-    });
-  }, 2000);
-}
-
-function showWaiting(revealed) {
-  showView('wait');
-  const el = document.getElementById('wait-content');
-  if (revealed) {
-    el.innerHTML = `
-      <div style="width:56px;height:56px;border-radius:16px;background:var(--accent-m);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:28px">✓</div>
-      <h2 style="font-size:22px;font-weight:700;margin-bottom:6px">Results are in</h2>
-      <p style="color:var(--muted);font-size:14px">Check the presenter screen for the full breakdown.</p>
-      <div style="margin-top:24px;padding:18px;background:var(--bg1);border-radius:12px;border:1px solid var(--border);width:100%;max-width:340px;text-align:left">
-        <div style="font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:0.1em;font-weight:600;margin-bottom:12px">Your allocation</div>
-        ${CATEGORIES.filter(c=>alloc[c.id]>0).sort((a,b)=>alloc[b.id]-alloc[a.id]).map(c=>`<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border)"><span style="color:var(--muted);font-size:13px">${c.icon} ${c.name}</span><span style="color:${c.color};font-weight:600;font-size:13px">${fmt(alloc[c.id])}</span></div>`).join('')}
-      </div>`;
-  } else {
-    el.innerHTML = `
-      <div style="animation:float 3s ease-in-out infinite;margin-bottom:12px"><div style="width:56px;height:56px;border-radius:16px;background:var(--accent-m);display:flex;align-items:center;justify-content:center;margin:0 auto">${LOGO_SVG.replace('44','28').replace('44','28')}</div></div>
-      <h2 style="font-size:20px;font-weight:700;margin-bottom:4px">Submitted</h2>
-      <p style="color:var(--muted);font-size:14px">Thanks, ${playerName}. Waiting for the reveal...</p>
-      <div style="margin-top:18px;display:flex;gap:5px;justify-content:center">${[0,1,2].map(i=>`<div style="width:6px;height:6px;border-radius:50%;background:var(--accent);animation:bounce 1.4s ease-in-out ${i*0.16}s infinite"></div>`).join('')}</div>`;
-    // Listen for reveal
-  }
+function changeAlloc(id,dir){const nv=alloc[id]+dir*STEP;if(nv<0)return;const nt=Object.values({...alloc,[id]:nv}).reduce((a,b)=>a+b,0);if(nt>BUDGET)return;alloc[id]=nv;renderAllocation();}
+function submitAllocation(){const total=Object.values(alloc).reduce((a,b)=>a+b,0);if(total!==BUDGET)return;const st=Date.now();publish('votes/'+playerId,{name:playerName,company:playerCompany,allocations:alloc,ts:st},true);fireConfetti();setTimeout(()=>{showWaiting(false);subscribe('phase',data=>{if(data.phase==='revealed'&&data.ts>st)showWaiting(true);});},2000);}
+function showWaiting(revealed){
+  showView('wait');const el=document.getElementById('wait-content');
+  if(revealed){el.innerHTML=`<div style="text-align:center"><div style="width:52px;height:52px;border-radius:14px;background:var(--accent-bg);display:flex;align-items:center;justify-content:center;margin:0 auto 14px"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg></div><h2 style="font-size:20px;font-weight:700;margin-bottom:6px">Results are in</h2><p style="color:var(--text-dim);font-size:14px">Check the presenter screen for the full breakdown.</p><div style="margin-top:20px;text-align:left">${CATEGORIES.filter(c=>alloc[c.id]>0).sort((a,b)=>alloc[b.id]-alloc[a.id]).map(c=>`<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--glass-border)"><span style="color:var(--text-sec);font-size:13px">${c.name}</span><span style="color:${c.color};font-weight:600;font-size:13px">${fmt(alloc[c.id])}</span></div>`).join('')}</div></div>`;}
+  else{el.innerHTML=`<div style="text-align:center"><div style="animation:float 3s ease-in-out infinite;margin-bottom:12px">${LOGO_SVG.replace(/36/g,'40')}</div><h2 style="font-size:20px;font-weight:700;margin-bottom:4px">Submitted</h2><p style="color:var(--text-dim);font-size:14px">Thanks, ${playerName}. Waiting for the reveal...</p><div style="margin-top:16px;display:flex;gap:5px;justify-content:center">${[0,1,2].map(i=>`<div style="width:6px;height:6px;border-radius:50%;background:var(--accent);animation:bounce 1.4s ease-in-out ${i*0.16}s infinite"></div>`).join('')}</div></div>`;}
 }
 
 // ╔═══════════════════════════════════════════════════════════════╗
 // ║  PRESENTER                                                    ║
 // ╚═══════════════════════════════════════════════════════════════╝
-function initPresenter() {
-  phase = 'voting';
-  participants = {};
-  showView('presenter');
-
-  connectMQTT(() => {
-    subscribe('votes/#', (data, topic) => {
-      const pid = topic.split('/').pop();
-      participants[pid] = data;
-      renderPresenter();
-    });
-  });
-
-  renderPresenter();
-}
-
-function renderPresenter() {
-  const parts = Object.values(participants);
-  const pL = p => p.company ? `${p.name} (${p.company})` : p.name;
-  const agg = CATEGORIES.map(cat => {
-    const total = parts.reduce((s,p) => s + (p.allocations?.[cat.id]||0), 0);
-    return {...cat, total, avg: parts.length > 0 ? Math.round(total / parts.length) : 0};
-  });
-  const sorted = [...agg].sort((a,b) => b.avg - a.avg);
-  const maxA = Math.max(...sorted.map(c=>c.avg), 1);
-  const timerStr = timer !== null ? `${Math.floor(timer/60)}:${(timer%60).toString().padStart(2,'0')}` : null;
-  const autoUrl = window.location.origin + window.location.pathname;
-  const isLocalFile = autoUrl.startsWith('file:');
-  const effectiveBase = baseUrl || (isLocalFile ? '' : autoUrl);
-  const joinUrl = effectiveBase ? effectiveBase + '?s=' + sessionId : '';
-  const mqttAvail = typeof mqtt !== 'undefined';
-  const connected = mqttClient?.connected;
-  const connLabel = connected ? 'Live' : mqttAvail ? 'Connecting...' : 'Loading sync...';
-  const connClass = connected ? 'connected' : 'disconnected';
-
-  let html = `
-    <!-- Header -->
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:32px;flex-wrap:wrap;gap:14px">
-      <div style="display:flex;align-items:center;gap:14px">
-        ${LOGO_SVG.replace(/44/g,'36')}
-        <div>
-          <h1 style="font-size:24px;font-weight:800;letter-spacing:-0.04em;line-height:1">Fund the Future</h1>
-          <p style="font-size:13px;color:var(--dim);margin-top:3px">AI × Sustainability | Where would you invest 100k?</p>
-        </div>
-      </div>
-      <div style="display:flex;align-items:center;gap:8px">
-        <div style="display:flex;align-items:center;gap:6px;padding:6px 14px;border-radius:8px;border:1px solid var(--border);background:var(--bg1)">
-          <span class="connection-dot ${connClass}"></span>
-          <span style="font-size:12px;color:var(--dim)">${connLabel}</span>
-        </div>
-        <span style="font-size:12px;color:var(--dim);padding:6px 12px;background:var(--bg1);border:1px solid var(--border);border-radius:8px;font-family:monospace">Session: ${sessionId}</span>
-      </div>
+function initPresenter(){phase='voting';participants={};showView('presenter');connectMQTT(()=>{subscribe('votes/#',(d,t)=>{participants[t.split('/').pop()]=d;renderPresenter();});});renderPresenter();}
+function updateBaseUrl(u){baseUrl=u.trim().replace(/\/+$/,'');renderPresenter();}
+function renderPresenter(){
+  const parts=Object.values(participants),pL=p=>p.company?`${p.name} (${p.company})`:p.name;
+  const agg=CATEGORIES.map(c=>{const t=parts.reduce((s,p)=>s+(p.allocations?.[c.id]||0),0);return{...c,total:t,avg:parts.length>0?Math.round(t/parts.length):0};});
+  const sorted=[...agg].sort((a,b)=>b.avg-a.avg),maxA=Math.max(...sorted.map(c=>c.avg),1);
+  const timerStr=timer!==null?`${Math.floor(timer/60)}:${(timer%60).toString().padStart(2,'0')}`:null;
+  const autoUrl=window.location.origin+window.location.pathname,isLocal=autoUrl.startsWith('file:');
+  const effBase=baseUrl||(isLocal?'':autoUrl),joinUrl=effBase?effBase+'?s='+sessionId:'';
+  const conn=mqttClient?.connected;
+  let h=`
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;flex-wrap:wrap;gap:14px">
+    <div style="display:flex;align-items:center;gap:12px">${LOGO_SVG}<div><h1 style="font-size:22px;font-weight:800;letter-spacing:-0.04em;line-height:1">Fund the Future</h1><p style="font-size:12px;color:var(--text-dim);margin-top:2px">AI × Sustainability | Where would you invest 100k?</p></div></div>
+    <div style="display:flex;align-items:center;gap:8px">
+      <div class="glass" style="display:flex;align-items:center;gap:6px;padding:6px 14px;border-radius:20px"><span class="conn-dot ${conn?'on':'off'}"></span><span style="font-size:12px;color:var(--text-dim)">${conn?'Live':'Connecting...'}</span></div>
+      <span class="glass" style="font-size:11px;color:var(--text-dim);padding:6px 12px;border-radius:20px;font-family:monospace">Session: ${sessionId}</span>
     </div>
-
-    <!-- QR Panel -->
-    <div style="background:var(--bg1);border-radius:16px;padding:28px 32px;margin-bottom:28px;border:1px solid var(--border);display:flex;align-items:center;gap:36px;justify-content:center">
-      ${joinUrl
-        ? `<div style="border-radius:14px;overflow:hidden;border:1px solid var(--border)">${makeQR(joinUrl, 180)}</div>`
-        : `<div style="width:180px;height:180px;background:var(--bg2);border-radius:12px;border:2px dashed var(--border);display:flex;align-items:center;justify-content:center;color:var(--dim);font-size:12px;text-align:center;padding:16px;flex-shrink:0">Set your GitHub Pages URL below</div>`
-      }
-      <div style="flex:1;max-width:420px">
-        <h3 style="font-size:18px;font-weight:700;margin-bottom:6px">Scan to participate</h3>
-        <p style="color:var(--muted);font-size:13px;line-height:1.6;margin-bottom:12px">
-          ${isLocalFile && !baseUrl
-            ? 'You\'re running locally. Enter your GitHub Pages URL below to generate the QR code.'
-            : `Open this link on your phone to allocate your ${fmt(BUDGET)} budget.`
-          }
-        </p>
-        <div style="margin-bottom:8px">
-          <label style="font-size:11px;color:var(--dim);text-transform:uppercase;letter-spacing:0.08em;font-weight:500;display:block;margin-bottom:4px">Page URL (auto-detected on GitHub Pages)</label>
-          <div style="display:flex;gap:8px">
-            <input type="text" id="qr-base-url" value="${baseUrl || effectiveBase}" placeholder="https://username.github.io/fund-the-future/"
-              style="flex:1;padding:8px 12px;font-size:12px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);outline:none;font-family:'SF Mono','Fira Code',monospace;box-sizing:border-box"
-              onchange="updateBaseUrl(this.value)" />
-            <button class="btn accent" onclick="updateBaseUrl(document.getElementById('qr-base-url').value)" style="padding:8px 14px;font-size:12px">Apply</button>
-          </div>
-        </div>
-        ${joinUrl ? `<div style="padding:6px 12px;background:var(--bg);border-radius:8px;font-size:11px;color:var(--accent);font-family:'SF Mono','Fira Code',monospace;word-break:break-all;line-height:1.4;user-select:all;border:1px solid var(--accent-b)">${joinUrl}</div>` : ''}
-      </div>
+  </div>
+  <div class="glass" style="padding:24px 28px;margin-bottom:24px;display:flex;align-items:center;gap:32px;justify-content:center;border-radius:20px">
+    ${joinUrl?`<div style="border-radius:14px;overflow:hidden;border:1px solid var(--glass-border)">${makeQR(joinUrl,170)}</div>`:`<div style="width:170px;height:170px;background:var(--glass);border-radius:12px;border:2px dashed var(--glass-border);display:flex;align-items:center;justify-content:center;color:var(--text-dim);font-size:12px;text-align:center;padding:16px;flex-shrink:0">Set your URL below</div>`}
+    <div style="flex:1;max-width:400px">
+      <h3 style="font-size:17px;font-weight:700;margin-bottom:6px">Scan to participate</h3>
+      <p style="color:var(--text-sec);font-size:13px;line-height:1.6;margin-bottom:10px">${isLocal&&!baseUrl?'Running locally. Enter your GitHub Pages URL below.':'Open this link on your phone to join the session.'}</p>
+      <div style="margin-bottom:6px"><label style="font-size:10px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.08em;font-weight:500;display:block;margin-bottom:3px">Page URL</label>
+      <div style="display:flex;gap:6px"><input type="text" id="qr-base-url" value="${baseUrl||effBase}" placeholder="https://your-site.github.io/fund-the-future/" class="field mono" style="flex:1" onchange="updateBaseUrl(this.value)"><button class="btn accent" onclick="updateBaseUrl(document.getElementById('qr-base-url').value)" style="padding:8px 14px;font-size:12px">Apply</button></div></div>
+      ${joinUrl?`<div style="padding:5px 10px;background:var(--accent-bg);border-radius:8px;font-size:11px;color:var(--accent);font-family:monospace;word-break:break-all;line-height:1.4;user-select:all;border:1px solid var(--accent-border)">${joinUrl}</div>`:''}
     </div>
-
-    <!-- Stats -->
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:24px">
-      <div class="card"><span class="stat-label">Participants</span><span class="stat-value" style="color:var(--accent)">${parts.length}</span><span style="font-size:12px;color:var(--dim)">${phase==='revealed'?'Results visible':'Voting open'}</span></div>
-      <div class="card" style="${timer!==null&&timer<=30?'border-color:rgba(239,68,68,0.25)':''}"><span class="stat-label">Timer</span>${timerStr?`<span class="stat-value" style="color:${timer<=30?'var(--danger)':timer<=60?'var(--gold)':'var(--text)'}">${timerStr}</span><span style="font-size:12px;color:var(--dim)">${timerActive?'Running':'Stopped'}</span>`:`<span style="font-size:14px;color:var(--dim);display:block;margin-top:4px">Not started</span>`}</div>
-      <div class="card"><span class="stat-label">Phase</span><span class="stat-value" style="color:${phase==='voting'?'var(--gold)':'var(--accent)'}">${phase==='voting'?'Voting':'Revealed'}</span><span style="font-size:12px;color:var(--dim)">${phase==='voting'?'Awaiting submissions':'On screen'}</span></div>
-    </div>
-
-    <!-- Actions -->
-    <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:28px;align-items:center">`;
-
-  if (phase === 'voting') {
-    if (!timerActive) {
-      html += `<div style="position:relative" id="timer-menu-wrap"><button class="btn accent" onclick="toggleTimerMenu()">⏱ Start Timer ▾</button><div id="timer-dropdown" style="display:none;position:absolute;top:100%;left:0;margin-top:4px;background:var(--bg1);border:1px solid var(--border);border-radius:10px;overflow:hidden;z-index:50;box-shadow:0 12px 40px rgba(0,0,0,0.6)">
-        ${TIMERS.map(t=>`<button style="display:block;width:100%;padding:10px 24px;font-size:13px;font-weight:500;color:var(--accent);background:transparent;border:none;border-bottom:1px solid var(--border);cursor:pointer;text-align:left;font-family:inherit" onmouseover="this.style.background='var(--accent-m)'" onmouseout="this.style.background='transparent'" onclick="startTimer(${t.s})">${t.l}</button>`).join('')}
-      </div></div>`;
-    } else {
-      html += `<button class="btn danger" onclick="stopTimer()">⏹ Stop</button>`;
-    }
-    html += `<button class="btn" onclick="showManualEntry()">✏ Manual Entry</button>`;
-    html += `<div style="flex:1"></div>`;
-    html += `<button class="reveal-btn" ${parts.length===0?'disabled':''} onclick="revealResults()">🎬 Reveal Results</button>`;
-  } else {
-    html += `<button class="btn accent" onclick="exportResults()">Export Results</button>`;
-    html += `<button class="btn" onclick="broadcastReveal()" title="Re-send reveal notification to all participants">📡 Notify Participants</button>`;
-    html += `<div style="flex:1"></div>`;
-    html += `<button class="btn danger" onclick="resetGame()">New Game</button>`;
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px">
+    <div class="glass" style="padding:16px 20px;border-radius:14px"><span class="stat-label">Participants</span><span class="stat-value" style="color:var(--accent)">${parts.length}</span><span style="font-size:11px;color:var(--text-dim)">${phase==='revealed'?'Results visible':'Voting open'}</span></div>
+    <div class="glass" style="padding:16px 20px;border-radius:14px;${timer!==null&&timer<=30?'border-color:rgba(220,38,38,0.25)':''}"><span class="stat-label">Timer</span>${timerStr?`<span class="stat-value" style="color:${timer<=30?'var(--danger)':timer<=60?'var(--gold)':'var(--text)'}">${timerStr}</span><span style="font-size:11px;color:var(--text-dim)">${timerActive?'Running':'Stopped'}</span>`:`<span style="font-size:14px;color:var(--text-dim);display:block;margin-top:2px">Not started</span>`}</div>
+    <div class="glass" style="padding:16px 20px;border-radius:14px"><span class="stat-label">Phase</span><span class="stat-value" style="color:${phase==='voting'?'var(--gold)':'var(--accent)'}">${phase==='voting'?'Voting':'Revealed'}</span><span style="font-size:11px;color:var(--text-dim)">${phase==='voting'?'Awaiting submissions':'On screen'}</span></div>
+  </div>
+  <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px;align-items:center">`;
+  if(phase==='voting'){
+    if(!timerActive){h+=`<div style="position:relative" id="tmw"><button class="btn accent" onclick="document.getElementById('tdd').style.display=document.getElementById('tdd').style.display==='none'?'block':'none'">⏱ Start Timer ▾</button><div id="tdd" style="display:none;position:absolute;top:100%;left:0;margin-top:4px;border-radius:12px;overflow:hidden;z-index:50;box-shadow:var(--shadow-lg)" class="glass-strong">${TIMERS.map(t=>`<button style="display:block;width:100%;padding:10px 24px;font-size:13px;font-weight:500;color:var(--accent);background:transparent;border:none;border-bottom:1px solid var(--glass-border);cursor:pointer;text-align:left;font-family:inherit" onmouseover="this.style.background='var(--accent-bg)'" onmouseout="this.style.background='transparent'" onclick="startTimer(${t.s})">${t.l}</button>`).join('')}</div></div>`;}
+    else{h+=`<button class="btn danger" onclick="stopTimer()">⏹ Stop</button>`;}
+    h+=`<button class="btn" onclick="showManualEntry()">✏ Manual Entry</button><div style="flex:1"></div>`;
+    h+=`<button class="reveal-btn" ${parts.length===0?'disabled':''} onclick="revealResults()">🎬 Reveal Results</button>`;
+  }else{
+    h+=`<button class="btn accent" onclick="exportResults()">Export Results</button>`;
+    h+=`<button class="btn" onclick="broadcastReveal()">📡 Notify Participants</button><div style="flex:1"></div>`;
+    h+=`<button class="btn danger" onclick="resetGame()">New Game</button>`;
   }
-
-  html += `</div>`;
-
-  // Participant pills
-  if (parts.length > 0 && phase === 'voting') {
-    html += `<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:24px">${parts.map(p=>`<div class="pill">✓ ${pL(p)}</div>`).join('')}</div>`;
+  h+=`</div>`;
+  if(parts.length>0&&phase==='voting'){h+=`<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:20px">${parts.map(p=>`<div class="pill">✓ ${pL(p)}</div>`).join('')}</div>`;}
+  if(parts.length>0){
+    h+=`<div style="display:grid;grid-template-columns:${phase==='revealed'?'1fr 340px':'1fr'};gap:16px">`;
+    h+=`<div class="glass" style="padding:24px 20px;border-radius:20px"><div style="text-align:center;margin-bottom:24px"><h2 style="font-size:18px;font-weight:700;letter-spacing:-0.02em;margin-bottom:4px">${phase==='revealed'?'Results':'Results (Hidden)'}</h2><p style="color:var(--text-dim);font-size:12px">${phase==='revealed'?`Average per person across ${parts.length} participants`:'Hit "Reveal Results" to show'}</p></div>`;
+    sorted.forEach((cat,i)=>{const pct=maxA>0?(cat.avg/maxA)*100:0,r=phase==='revealed'?i+1:null,show=phase==='revealed';
+      h+=`<div style="margin-bottom:18px;opacity:${show?1:0.08};transition:opacity 0.5s"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px"><div style="display:flex;align-items:center;gap:8px">${r?`<span class="rank-badge" style="background:${r===1?'var(--gold)':r===2?'var(--silver)':r===3?'var(--bronze)':'var(--glass)'};color:${r<=3?'var(--text-inv)':'var(--text-dim)'}">${r}</span>`:''}<span class="cat-icon-svg" style="width:22px;height:22px">${ICONS[cat.id]}</span><span style="font-size:13px;font-weight:600">${cat.name}</span></div><span style="font-size:18px;font-weight:700;color:${cat.color};font-variant-numeric:tabular-nums;opacity:${show?1:0};transition:opacity 0.6s ease ${i*0.35}s;min-width:80px;text-align:right">${fmt(cat.avg)}</span></div><div class="anim-bar-track"><div class="anim-bar-fill" id="bf-${cat.id}" style="background:${cat.color};width:${show?Math.max(pct,1.5)+'%':'0%'};transition-delay:${i*0.35}s">${show&&pct>20?`<span>${Math.round(pct)}%</span>`:''}</div></div></div>`;});
+    h+=`</div>`;
+    if(phase==='revealed'){h+=`<div class="glass" style="padding:20px 16px;border-radius:20px;align-self:start"><h3 style="font-size:14px;font-weight:600;text-align:center;margin-bottom:12px">Individual Breakdown</h3>`;
+      parts.forEach((p,i)=>{const ps=CATEGORIES.filter(c=>(p.allocations?.[c.id]||0)>0).sort((a,b)=>(p.allocations?.[b.id]||0)-(p.allocations?.[a.id]||0));
+        h+=`<div style="margin-bottom:4px"><button onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none';this.querySelector('.ar').style.transform=this.nextElementSibling.style.display==='none'?'':'rotate(180deg)'" class="glass" style="width:100%;display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-radius:10px;cursor:pointer;color:var(--text);font-size:13px;font-weight:500;font-family:inherit"><span>${pL(p)}</span><span class="ar" style="color:var(--text-dim);font-size:14px;transition:transform 0.2s">▾</span></button><div style="display:none;padding:8px 14px;background:var(--glass);border:1px solid var(--glass-border);border-radius:0 0 10px 10px;margin-top:-1px">${ps.map(c=>`<div style="display:flex;align-items:center;gap:6px;padding:4px 0"><span class="cat-icon-svg" style="width:16px;height:16px">${ICONS[c.id]}</span><span style="flex:1;font-size:12px;color:var(--text-sec)">${c.name}</span><span style="font-size:13px;font-weight:600;color:${c.color}">${fmt(p.allocations[c.id])}</span></div>`).join('')}</div></div>`;});
+      h+=`</div>`;}
+    h+=`</div>`;
+  }else{
+    h+=`<div class="glass" style="text-align:center;padding:60px 20px;border-radius:20px;border-style:dashed"><svg width="48" height="48" viewBox="0 0 48 48" fill="none"><rect x="8" y="4" width="32" height="40" rx="4" stroke="var(--text-dim)" stroke-width="1.5" stroke-dasharray="3 3"/><circle cx="24" cy="20" r="6" stroke="var(--text-dim)" stroke-width="1.5"/><path d="M14 36L24 28L34 36" stroke="var(--text-dim)" stroke-width="1.5" stroke-linecap="round"/></svg><h3 style="color:var(--text-sec);font-size:15px;font-weight:600;margin-top:12px;margin-bottom:4px">No participants yet</h3><p style="color:var(--text-dim);font-size:13px">Share the QR code or use Manual Entry.</p></div>`;
   }
-
-  // Chart
-  if (parts.length > 0) {
-    html += `<div style="display:grid;grid-template-columns:${phase==='revealed'?'1fr 340px':'1fr'};gap:20px">`;
-    html += `<div class="card" style="padding:28px 24px"><div style="text-align:center;margin-bottom:28px"><h2 style="font-size:20px;font-weight:700;letter-spacing:-0.02em;margin-bottom:4px">${phase==='revealed'?'Results':'Results (Hidden)'}</h2><p style="color:var(--dim);font-size:13px">${phase==='revealed'?`Average per person across ${parts.length} participants`:'Hit "Reveal Results" to show'}</p></div>`;
-    sorted.forEach((cat, i) => {
-      const pct = maxA > 0 ? (cat.avg / maxA) * 100 : 0;
-      const r = phase === 'revealed' ? i + 1 : null;
-      const show = phase === 'revealed';
-      html += `<div style="margin-bottom:20px;opacity:${show?1:0.08};transition:opacity 0.5s">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-          <div style="display:flex;align-items:center;gap:10px">
-            ${r?`<span class="rank-badge" style="background:${r===1?'var(--gold)':r===2?'var(--silver)':r===3?'var(--bronze)':'rgba(255,255,255,0.06)'};color:${r<=3?'var(--bg)':'var(--dim)'}">${r}</span>`:''}
-            <span style="font-size:22px">${cat.icon}</span>
-            <span style="font-size:14px;font-weight:600">${cat.name}</span>
-          </div>
-          <span style="font-size:20px;font-weight:700;color:${cat.color};font-variant-numeric:tabular-nums;opacity:${show?1:0};transition:opacity 0.6s ease ${i*0.35}s;min-width:90px;text-align:right;letter-spacing:-0.02em" id="bar-val-${cat.id}">${fmt(cat.avg)}</span>
-        </div>
-        <div class="anim-bar-track"><div class="anim-bar-fill" id="bar-fill-${cat.id}" style="background:${cat.color};width:${show?Math.max(pct,1.5)+'%':'0%'};transition-delay:${i*0.35}s">${show&&pct>20?`<span style="color:var(--bg)">${Math.round(pct)}%</span>`:''}</div></div>
-      </div>`;
-    });
-    html += `</div>`;
-
-    // Individual breakdown
-    if (phase === 'revealed') {
-      html += `<div class="card" style="padding:24px 18px;align-self:start"><h3 style="font-size:14px;font-weight:600;text-align:center;margin-bottom:14px;letter-spacing:-0.01em">Individual Breakdown</h3>`;
-      parts.forEach((p, i) => {
-        const ps = CATEGORIES.filter(c=>(p.allocations?.[c.id]||0)>0).sort((a,b)=>(p.allocations?.[b.id]||0)-(p.allocations?.[a.id]||0));
-        html += `<div style="margin-bottom:4px"><button onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none';this.querySelector('.arrow').style.transform=this.nextElementSibling.style.display==='none'?'':'rotate(180deg)'" style="width:100%;display:flex;justify-content:space-between;align-items:center;padding:11px 14px;background:var(--bg);border:1px solid var(--border);border-radius:10px;cursor:pointer;color:var(--text);font-size:13px;font-weight:500;font-family:inherit"><span>${pL(p)}</span><span class="arrow" style="color:var(--dim);font-size:14px;transition:transform 0.2s">▾</span></button>
-        <div style="display:none;padding:8px 14px;background:var(--bg2);border:1px solid var(--border);border-top:none;border-radius:0 0 10px 10px">${ps.map(c=>`<div style="display:flex;align-items:center;gap:6px;padding:4px 0"><span style="font-size:14px">${c.icon}</span><span style="flex:1;font-size:12px;color:var(--muted)">${c.name}</span><span style="font-size:13px;font-weight:600;color:${c.color};font-variant-numeric:tabular-nums">${fmt(p.allocations[c.id])}</span></div>`).join('')}</div></div>`;
-      });
-      html += `</div>`;
-    }
-    html += `</div>`;
-  } else {
-    html += `<div style="text-align:center;padding:72px 20px;background:var(--bg1);border-radius:16px;border:1px dashed var(--border)">
-      <svg width="48" height="48" viewBox="0 0 48 48" fill="none"><rect x="8" y="4" width="32" height="40" rx="4" stroke="var(--dim)" stroke-width="1.5" stroke-dasharray="3 3"/><circle cx="24" cy="20" r="6" stroke="var(--dim)" stroke-width="1.5"/><path d="M14 36L24 28L34 36" stroke="var(--dim)" stroke-width="1.5" stroke-linecap="round"/></svg>
-      <h3 style="color:var(--muted);font-size:16px;font-weight:600;margin-top:14px;margin-bottom:6px">No participants yet</h3>
-      <p style="color:var(--dim);font-size:13px">Share the QR code or use Manual Entry.</p>
-    </div>`;
-  }
-
-  document.getElementById('presenter-root').innerHTML = html;
-
-  // Animate bars after render
-  if (phase === 'revealed') {
-    requestAnimationFrame(() => {
-      sorted.forEach((cat, i) => {
-        const pct = maxA > 0 ? (cat.avg / maxA) * 100 : 0;
-        setTimeout(() => {
-          const fill = document.getElementById('bar-fill-' + cat.id);
-          if (fill) fill.style.width = Math.max(pct, 1.5) + '%';
-        }, 50);
-      });
-    });
-  }
+  document.getElementById('presenter-root').innerHTML=h;
 }
 
-function updateBaseUrl(url) {
-  url = url.trim().replace(/\/+$/, ''); // remove trailing slashes
-  baseUrl = url;
-  renderPresenter();
+function startTimer(s){timer=s;timerActive=true;document.getElementById('tdd').style.display='none';clearInterval(timerInterval);timerInterval=setInterval(()=>{if(timer>0){timer--;renderPresenter();}else{timerActive=false;clearInterval(timerInterval);renderPresenter();}},1000);renderPresenter();}
+function stopTimer(){timerActive=false;clearInterval(timerInterval);renderPresenter();}
+function revealResults(){phase='revealed';publish('phase',{phase:'revealed',ts:Date.now()},true);renderPresenter();}
+function broadcastReveal(){publish('phase',{phase:'revealed',ts:Date.now()},true);}
+function resetGame(){if(!confirm('Delete all data and start a new session?'))return;participants={};phase='voting';timer=null;timerActive=false;clearInterval(timerInterval);if(mqttClient){try{mqttClient.end();}catch{}}sessionId=Math.random().toString(36).substr(2,6);connectMQTT(()=>{subscribe('votes/#',(d,t)=>{participants[t.split('/').pop()]=d;renderPresenter();});});renderPresenter();}
+
+function showManualEntry(){const al={};CATEGORIES.forEach(c=>al[c.id]=0);const m=document.createElement('div');m.className='modal-bg';m.id='mm';const render=()=>{const t=Object.values(al).reduce((a,b)=>a+b,0),r=BUDGET-t,n=m.querySelector('#mn')?.value||'',ok=r===0&&n.trim();m.querySelector('#mr').textContent='Remaining: '+fmt(r);m.querySelector('#mr').style.color=r===0?'var(--accent)':'var(--gold)';m.querySelector('#ms').disabled=!ok;CATEGORIES.forEach(c=>{m.querySelector(`#mv-${c.id}`).textContent=(al[c.id]/1000)+'k';});};
+  m.innerHTML=`<div class="glass-strong modal"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px"><h3 style="font-size:16px;font-weight:700">Manual Entry</h3><button onclick="document.getElementById('mm').remove()" style="background:none;border:none;color:var(--text-dim);font-size:18px;cursor:pointer">✕</button></div><div style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px"><input type="text" id="mn" class="field" placeholder="Name" maxlength="20" oninput="this.closest('.modal-bg')._r()"><input type="text" id="mc" class="field sm" placeholder="Company (optional)" maxlength="40"></div><div id="mr" style="font-size:13px;text-align:center;margin-bottom:10px;font-weight:600;color:var(--gold)">Remaining: ${fmt(BUDGET)}</div>${CATEGORIES.map(c=>`<div style="display:flex;align-items:center;gap:6px;margin-bottom:5px"><span class="cat-icon-svg" style="width:18px;height:18px">${ICONS[c.id]}</span><span style="flex:1;font-size:11px;color:var(--text-sec);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${c.name}</span><button class="cat-btn" style="width:26px;height:26px;font-size:14px" onclick="this.closest('.modal-bg')._d('${c.id}')">−</button><span id="mv-${c.id}" style="width:40px;text-align:center;font-size:13px;font-weight:700;color:${c.color}">0k</span><button class="cat-btn" style="width:26px;height:26px;font-size:14px;color:${c.color}" onclick="this.closest('.modal-bg')._i('${c.id}')">+</button></div>`).join('')}<button id="ms" class="btn primary" disabled style="width:100%;margin-top:12px;padding:12px" onclick="this.closest('.modal-bg')._s()">Save</button></div>`;
+  m._r=render;m._i=id=>{const n={...al,[id]:al[id]+STEP};if(Object.values(n).reduce((a,b)=>a+b,0)<=BUDGET){al[id]+=STEP;render();}};m._d=id=>{if(al[id]>0){al[id]-=STEP;render();}};
+  m._s=()=>{const n=m.querySelector('#mn').value.trim(),c=m.querySelector('#mc').value.trim(),pid='m_'+n.toLowerCase().replace(/[^a-z0-9]/g,'')+'_'+Date.now().toString(36);publish('votes/'+pid,{name:n,company:c,allocations:al,ts:Date.now()},true);participants[pid]={name:n,company:c,allocations:al,ts:Date.now()};m.remove();renderPresenter();};
+  document.body.appendChild(m);
 }
 
-function toggleTimerMenu() {
-  const dd = document.getElementById('timer-dropdown');
-  dd.style.display = dd.style.display === 'none' ? 'block' : 'none';
+function exportResults(){const parts=Object.values(participants),pL=p=>p.company?`${p.name} (${p.company})`:p.name;const agg=CATEGORIES.map(c=>({...c,total:parts.reduce((s,p)=>s+(p.allocations?.[c.id]||0),0),avg:parts.length>0?Math.round(parts.reduce((s,p)=>s+(p.allocations?.[c.id]||0),0)/parts.length):0}));const sorted=[...agg].sort((a,b)=>b.avg-a.avg);let txt=`Fund the Future: AI x Sustainability\n100k Budget Game Results\n\nParticipants: ${parts.length}\n\nRanking\n`;sorted.forEach((c,i)=>txt+=`${i+1}. ${c.name}: ${fmt(c.total)} total (avg ${fmt(c.avg)})\n`);txt+='\nIndividual Allocations\n';parts.forEach(p=>{txt+=`\n${pL(p)}:\n`;CATEGORIES.forEach(c=>{const v=p.allocations?.[c.id]||0;if(v>0)txt+=`  ${c.name}: ${fmt(v)}\n`;});});
+  const m=document.createElement('div');m.className='modal-bg';m.style.alignItems='center';m.innerHTML=`<div class="glass-strong modal" style="max-width:540px;max-height:80vh;display:flex;flex-direction:column"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><h3 style="font-size:16px;font-weight:700">Export</h3><button onclick="this.closest('.modal-bg').remove()" style="background:none;border:none;color:var(--text-dim);font-size:18px;cursor:pointer">✕</button></div><pre style="flex:1;overflow:auto;background:rgba(0,0,0,0.04);border-radius:10px;padding:14px;font-size:11px;color:var(--text-sec);white-space:pre-wrap;font-family:monospace;border:1px solid var(--glass-border);line-height:1.6">${txt}</pre><div style="display:flex;gap:8px;margin-top:12px"><button class="btn accent" style="flex:1" onclick="navigator.clipboard.writeText(this.closest('.modal-bg').querySelector('pre').textContent);this.textContent='✓ Copied';setTimeout(()=>this.textContent='Copy to clipboard',2000)">Copy to clipboard</button><button class="btn" style="flex:1" onclick="this.closest('.modal-bg').remove()">Close</button></div></div>`;
+  document.body.appendChild(m);
 }
 
-function startTimer(seconds) {
-  timer = seconds; timerActive = true;
-  document.getElementById('timer-dropdown').style.display = 'none';
-  clearInterval(timerInterval);
-  timerInterval = setInterval(() => {
-    if (timer > 0) { timer--; renderPresenter(); }
-    else { timerActive = false; clearInterval(timerInterval); renderPresenter(); }
-  }, 1000);
-  renderPresenter();
-}
-
-function stopTimer() {
-  timerActive = false; clearInterval(timerInterval); renderPresenter();
-}
-
-function revealResults() {
-  phase = 'revealed';
-  publish('phase', { phase: 'revealed', ts: Date.now() }, true);
-  renderPresenter();
-}
-
-function broadcastReveal() {
-  publish('phase', { phase: 'revealed', ts: Date.now() }, true);
-}
-
-function resetGame() {
-  if (!confirm('Delete all data and start a new session?')) return;
-  participants = {}; phase = 'voting'; timer = null; timerActive = false;
-  clearInterval(timerInterval);
-  // New session ID
-  if (mqttClient) { try { mqttClient.end(); } catch {} }
-  sessionId = Math.random().toString(36).substr(2, 6);
-  connectMQTT(() => {
-    subscribe('votes/#', (data, topic) => {
-      const pid = topic.split('/').pop();
-      participants[pid] = data;
-      renderPresenter();
-    });
-  });
-  renderPresenter();
-}
-
-function showManualEntry() {
-  const allocs = {}; CATEGORIES.forEach(c => allocs[c.id] = 0);
-  const modal = document.createElement('div');
-  modal.className = 'modal-bg';
-  modal.id = 'manual-modal';
-  const render = () => {
-    const total = Object.values(allocs).reduce((a,b)=>a+b,0);
-    const rem = BUDGET - total;
-    const name = modal.querySelector('#m-name')?.value || '';
-    const company = modal.querySelector('#m-company')?.value || '';
-    const ok = rem === 0 && name.trim();
-    modal.querySelector('#m-rem').textContent = 'Remaining: ' + fmt(rem);
-    modal.querySelector('#m-rem').style.color = rem === 0 ? 'var(--accent)' : 'var(--gold)';
-    modal.querySelector('#m-save').disabled = !ok;
-    modal.querySelector('#m-save').style.background = ok ? 'var(--accent)' : 'rgba(255,255,255,0.04)';
-    modal.querySelector('#m-save').style.color = ok ? 'var(--bg)' : 'var(--dim)';
-    CATEGORIES.forEach(c => { modal.querySelector(`#m-val-${c.id}`).textContent = (allocs[c.id]/1000)+'k'; });
-  };
-  modal.innerHTML = `<div class="modal"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px"><h3 style="font-size:16px;font-weight:700">Manual Entry</h3><button onclick="document.getElementById('manual-modal').remove()" style="background:none;border:none;color:var(--dim);font-size:18px;cursor:pointer">✕</button></div>
-    <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px"><input type="text" id="m-name" class="field" placeholder="Name" maxlength="20" oninput="this.closest('.modal-bg')._render()"><input type="text" id="m-company" class="field sm" placeholder="Company (optional)" maxlength="40"></div>
-    <div id="m-rem" style="font-size:13px;text-align:center;margin-bottom:12px;font-weight:600;color:var(--gold)">Remaining: ${fmt(BUDGET)}</div>
-    ${CATEGORIES.map(c=>`<div style="display:flex;align-items:center;gap:6px;margin-bottom:6px"><span style="font-size:16px;width:22px;text-align:center">${c.icon}</span><span style="flex:1;font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${c.name}</span><button class="cat-btn" style="width:28px;height:28px;font-size:14px" onclick="this.closest('.modal-bg')._dec('${c.id}')">−</button><span id="m-val-${c.id}" style="width:44px;text-align:center;font-size:13px;font-weight:700;color:${c.color};font-variant-numeric:tabular-nums">0k</span><button class="cat-btn plus" style="width:28px;height:28px;font-size:14px;border-color:${c.color}30;background:${c.color}10;color:${c.color}" onclick="this.closest('.modal-bg')._inc('${c.id}')">+</button></div>`).join('')}
-    <button id="m-save" class="btn primary" disabled style="width:100%;margin-top:14px;padding:12px" onclick="this.closest('.modal-bg')._save()">Save</button></div>`;
-  modal._allocs = allocs;
-  modal._render = render;
-  modal._inc = id => { const n={...allocs,[id]:allocs[id]+STEP}; if(Object.values(n).reduce((a,b)=>a+b,0)<=BUDGET){allocs[id]+=STEP;render();}};
-  modal._dec = id => { if(allocs[id]>0){allocs[id]-=STEP;render();}};
-  modal._save = () => {
-    const name = modal.querySelector('#m-name').value.trim();
-    const company = modal.querySelector('#m-company').value.trim();
-    const pid = 'm_' + name.toLowerCase().replace(/[^a-z0-9]/g,'') + '_' + Date.now().toString(36);
-    publish('votes/' + pid, { name, company, allocations: allocs, ts: Date.now() }, true);
-    participants[pid] = { name, company, allocations: allocs, ts: Date.now() };
-    modal.remove();
-    renderPresenter();
-  };
-  document.body.appendChild(modal);
-}
-
-function exportResults() {
-  const parts = Object.values(participants);
-  const pL = p => p.company ? `${p.name} (${p.company})` : p.name;
-  const agg = CATEGORIES.map(c => ({...c, total: parts.reduce((s,p) => s + (p.allocations?.[c.id]||0), 0), avg: parts.length > 0 ? Math.round(parts.reduce((s,p) => s + (p.allocations?.[c.id]||0), 0) / parts.length) : 0}));
-  const sorted = [...agg].sort((a,b) => b.avg - a.avg);
-  let txt = `Fund the Future: AI x Sustainability\n100k Budget Game Results\n\nParticipants: ${parts.length}\n\nRanking\n`;
-  sorted.forEach((c,i) => txt += `${i+1}. ${c.icon} ${c.name}: ${fmt(c.total)} total (avg ${fmt(c.avg)})\n`);
-  txt += '\nIndividual Allocations\n';
-  parts.forEach(p => { txt += `\n${pL(p)}:\n`; CATEGORIES.forEach(c => { const v = p.allocations?.[c.id]||0; if(v>0) txt += `  ${c.icon} ${c.name}: ${fmt(v)}\n`; }); });
-  const modal = document.createElement('div');
-  modal.className = 'modal-bg';
-  modal.style.alignItems = 'center';
-  modal.innerHTML = `<div class="modal" style="max-width:540px;max-height:80vh;display:flex;flex-direction:column"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px"><h3 style="font-size:16px;font-weight:700">Export</h3><button onclick="this.closest('.modal-bg').remove()" style="background:none;border:none;color:var(--dim);font-size:18px;cursor:pointer">✕</button></div>
-    <pre style="flex:1;overflow:auto;background:var(--bg);border-radius:10px;padding:14px;font-size:11px;color:var(--muted);white-space:pre-wrap;font-family:'JetBrains Mono','Fira Code',monospace;border:1px solid var(--border);line-height:1.6">${txt}</pre>
-    <div style="display:flex;gap:8px;margin-top:14px"><button class="btn accent" style="flex:1" onclick="navigator.clipboard.writeText(this.closest('.modal-bg').querySelector('pre').textContent);this.textContent='✓ Copied';setTimeout(()=>this.textContent='Copy to clipboard',2000)">Copy to clipboard</button><button class="btn" style="flex:1" onclick="this.closest('.modal-bg').remove()">Close</button></div></div>`;
-  document.body.appendChild(modal);
-}
-
-// ╔═══════════════════════════════════════════════════════════════╗
-// ║  CONFETTI                                                     ║
-// ╚═══════════════════════════════════════════════════════════════╝
-function fireConfetti() {
-  const box = document.getElementById('confetti-box');
-  box.style.display = 'block'; box.innerHTML = '';
-  const colors = CATEGORIES.map(c => c.color);
-  for (let i = 0; i < 60; i++) {
-    const p = document.createElement('div');
-    p.className = 'confetti-piece';
-    p.style.cssText = `left:${Math.random()*100}%;width:${5+Math.random()*6}px;height:${3+Math.random()*4}px;background:${colors[i%6]};--dur:${1.8+Math.random()*2}s;--delay:${Math.random()*0.6}s;--drift:${(Math.random()-0.5)*130}px;transform:rotate(${Math.random()*360}deg)`;
-    box.appendChild(p);
-  }
-  setTimeout(() => { box.style.display = 'none'; box.innerHTML = ''; }, 4000);
-}
+function fireConfetti(){const box=document.getElementById('confetti-box');box.style.display='block';box.innerHTML='';const cols=CATEGORIES.map(c=>c.color);for(let i=0;i<60;i++){const p=document.createElement('div');p.className='confetti-piece';p.style.cssText=`left:${Math.random()*100}%;width:${5+Math.random()*6}px;height:${3+Math.random()*4}px;background:${cols[i%6]};--dur:${1.8+Math.random()*2}s;--delay:${Math.random()*0.6}s;--drift:${(Math.random()-0.5)*130}px;transform:rotate(${Math.random()*360}deg)`;box.appendChild(p);}setTimeout(()=>{box.style.display='none';box.innerHTML='';},4000);}
 </script>
 </body>
 </html>
