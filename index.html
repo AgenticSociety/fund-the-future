@@ -244,10 +244,10 @@ function connectMQTT(onConnect) {
   }
 }
 
-function publish(subtopic, data) {
+function publish(subtopic, data, retain = false) {
   try {
     if (mqttClient?.connected) {
-      mqttClient.publish(`ftf/${sessionId}/${subtopic}`, JSON.stringify(data), { qos: 1, retain: true });
+      mqttClient.publish(`ftf/${sessionId}/${subtopic}`, JSON.stringify(data), { qos: 1, retain });
     }
   } catch(e) { console.error('Publish error:', e); }
 }
@@ -331,12 +331,10 @@ function startAllocation() {
   renderAllocation();
   showView('alloc');
 
-  // Connect MQTT and listen for phase changes
-  connectMQTT(() => {
-    subscribe('phase', data => {
-      if (data.phase === 'revealed') showWaiting(true);
-    });
-  });
+  // Disconnect old MQTT if any (important for repeat participation)
+  if (mqttClient) { try { mqttClient.end(true); } catch {} mqttClient = null; }
+  // Connect fresh MQTT (for submission), but do NOT subscribe to phase yet
+  connectMQTT();
 }
 
 function renderAllocation() {
@@ -392,9 +390,19 @@ function changeAlloc(id, dir) {
 function submitAllocation() {
   const total = Object.values(alloc).reduce((a,b) => a+b, 0);
   if (total !== BUDGET) return;
-  publish('votes/' + playerId, { name: playerName, company: playerCompany, allocations: alloc, ts: Date.now() });
+  const submitTime = Date.now();
+  publish('votes/' + playerId, { name: playerName, company: playerCompany, allocations: alloc, ts: submitTime }, true);
   fireConfetti();
-  setTimeout(() => showWaiting(false), 2000);
+  setTimeout(() => {
+    showWaiting(false);
+    // Subscribe to phase changes ONLY now (after submission)
+    // Timestamp guard: ignore any phase message older than our submission
+    subscribe('phase', data => {
+      if (data.phase === 'revealed' && data.ts > submitTime) {
+        showWaiting(true);
+      }
+    });
+  }, 2000);
 }
 
 function showWaiting(revealed) {
@@ -673,7 +681,7 @@ function showManualEntry() {
     const name = modal.querySelector('#m-name').value.trim();
     const company = modal.querySelector('#m-company').value.trim();
     const pid = 'm_' + name.toLowerCase().replace(/[^a-z0-9]/g,'') + '_' + Date.now().toString(36);
-    publish('votes/' + pid, { name, company, allocations: allocs, ts: Date.now() });
+    publish('votes/' + pid, { name, company, allocations: allocs, ts: Date.now() }, true);
     participants[pid] = { name, company, allocations: allocs, ts: Date.now() };
     modal.remove();
     renderPresenter();
