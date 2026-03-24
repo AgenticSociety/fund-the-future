@@ -286,10 +286,8 @@ function joinWithCode() {
 function selectRole(r) {
   role = r;
   if (r === 'participant') {
-    const params = new URLSearchParams(window.location.search);
-    sessionId = params.get('s') || document.getElementById('inp-session')?.value?.trim() || '';
+    sessionId = getSessionFromUrl() || document.getElementById('inp-session')?.value?.trim() || '';
     if (!sessionId) {
-      // No session? Focus the session code input
       document.getElementById('inp-session')?.focus();
       return;
     }
@@ -301,11 +299,24 @@ function selectRole(r) {
   }
 }
 
-// Auto-detect from URL: if ?s= is present, go straight to participant mode
-(function() {
+// Extract session code from URL - handles ?s=xxx, ?=xxx, bare params
+function getSessionFromUrl() {
   const params = new URLSearchParams(window.location.search);
-  if (params.get('s')) {
-    sessionId = params.get('s');
+  // Standard: ?s=xxx
+  if (params.get('s')) return params.get('s');
+  // Fallback: ?=xxx (user might type without param name)
+  for (const [key, val] of params.entries()) {
+    const code = val || key; // handle ?=xxx or ?xxx
+    if (code && code.length >= 4 && code.length <= 12 && /^[a-z0-9]+$/i.test(code)) return code;
+  }
+  return '';
+}
+
+// Auto-detect from URL: if session code is present, go straight to participant mode
+(function() {
+  const code = getSessionFromUrl();
+  if (code) {
+    sessionId = code;
     role = 'participant';
     showView('name');
     setTimeout(() => document.getElementById('inp-name')?.focus(), 100);
@@ -533,7 +544,9 @@ function renderPresenter() {
     html += `<div style="flex:1"></div>`;
     html += `<button class="reveal-btn" ${parts.length===0?'disabled':''} onclick="revealResults()">🎬 Reveal Results</button>`;
   } else {
-    html += `<button class="btn accent" onclick="exportResults()">Export Results</button><div style="flex:1"></div>`;
+    html += `<button class="btn accent" onclick="exportResults()">Export Results</button>`;
+    html += `<button class="btn" onclick="broadcastReveal()" title="Re-send reveal notification to all participants">📡 Notify Participants</button>`;
+    html += `<div style="flex:1"></div>`;
     html += `<button class="btn danger" onclick="resetGame()">New Game</button>`;
   }
 
@@ -629,8 +642,12 @@ function stopTimer() {
 
 function revealResults() {
   phase = 'revealed';
-  publish('phase', { phase: 'revealed', ts: Date.now() });
+  publish('phase', { phase: 'revealed', ts: Date.now() }, true);
   renderPresenter();
+}
+
+function broadcastReveal() {
+  publish('phase', { phase: 'revealed', ts: Date.now() }, true);
 }
 
 function resetGame() {
